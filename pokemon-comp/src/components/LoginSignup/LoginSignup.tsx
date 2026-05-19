@@ -3,12 +3,18 @@ import { HexagonBackground } from '../animate-ui/components/backgrounds/hexagon'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../animate-ui/components/radix/tabs';
 import loginIcon from '../../assets/Lock.png';
 import signupIcon from '../../assets/UserPlus.png';
+import pokeball from '../../assets/Pokeball.png';
+
 export default function LoginSignup() {
     return (
         <div className="relative min-h-screen">
                 <HexagonBackground className='fixed inset-0'/>
                 
                 <div className='relative z-10 pointer-events-none'>
+                    <div className='flex items-center w-fit mx-auto mt-10 pointer-events-auto'>
+                        <img src={pokeball} alt="Pokeball" className="w-10 h-10"/>
+                        <div className='ml-2 text-2xl font-bold text-gray-800 dark:text-gray-200'>PokeComp</div>
+                    </div>
                     <Tabs defaultValue="login" className="w-full max-w-md mx-auto mt-20 pointer-events-auto">
                         <TabsList className="bg-gray-200 dark:bg-gray-700 rounded-lg p-1 w-full">
                             <TabsTrigger value="login">
