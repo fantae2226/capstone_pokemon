@@ -4,8 +4,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../animate-ui/componen
 import loginIcon from '../../assets/Lock.png';
 import signupIcon from '../../assets/UserPlus.png';
 import pokeball from '../../assets/Pokeball.png';
+import { useState, useEffect } from 'react';
+
 
 export default function LoginSignup() {
+    const [loginData, setLoginData] = useState({ username: '', password: '' });
+    const [signupData, setSignupData] = useState({ username: '', email: '', password: '' });
+
+    async function handleLogin(e: React.FormEvent) {
+        e.preventDefault();
+        const res = await fetch('http://localhost:8000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(loginData)
+        });
+        const data = await res.json();
+        console.log('Login response:', data);
+    }
+
+    async function handleSignup(e: React.FormEvent) {
+        e.preventDefault();
+        const res = await fetch('http://localhost:8000/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(signupData)
+        });
+        const data = await res.json();
+        console.log('Signup response:', data);
+    }
+
+
+
+
+
     return (
         <div className="relative min-h-screen">
                 <HexagonBackground className='fixed inset-0'/>
@@ -27,18 +58,48 @@ export default function LoginSignup() {
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="login">
-                            <form className='flex flex-col gap-4 mt-4'>
-                                <input type="text" placeholder='Username' className='p-2 border rounded'/>
-                                <input type="password" placeholder='Password' className='p-2 border rounded'/>
+                            <form className='flex flex-col gap-4 mt-4' onSubmit={handleLogin}>
+                                <input 
+                                    type="text" 
+                                    placeholder='Username' 
+                                    className='p-2 border rounded'
+                                    value={loginData.username}
+                                    onChange={(e) => setLoginData({...loginData, username: e.target.value})}
+                                />
+                                <input 
+                                    type="password" 
+                                    placeholder='Password' 
+                                    className='p-2 border rounded'
+                                    value={loginData.password}
+                                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                                />
                                 <button type='submit' className='bg-blue-500 text-white py-2 rounded'>Login</button>
                             </form>
                         </TabsContent>
 
                         <TabsContent value="signup">
-                            <form className='flex flex-col gap-4 mt-4'>
-                                <input type="text" placeholder='Username' className='p-2 border rounded'/>
-                                <input type="email" placeholder='Email' className='p-2 border rounded'/>
-                                <input type="password" placeholder='Password' className='p-2 border rounded'/>
+                            <form className='flex flex-col gap-4 mt-4' onSubmit={handleSignup}>
+                                <input 
+                                    type="text" 
+                                    placeholder='Username' 
+                                    className='p-2 border rounded'
+                                    value={signupData.username}
+                                    onChange={(e) => setSignupData({...signupData, username: e.target.value})}
+                                />
+                                <input 
+                                    type="email" 
+                                    placeholder='Email' 
+                                    className='p-2 border rounded'
+                                    value={signupData.email}
+                                    onChange={(e) => setSignupData({...signupData, email: e.target.value})}
+                                />
+                                <input 
+                                    type="password" 
+                                    placeholder='Password' 
+                                    className='p-2 border rounded'
+                                    value={signupData.password}
+                                    onChange={(e) => setSignupData({...signupData, password: e.target.value})}
+                                />
                                 <button type='submit' className='bg-green-500 text-white py-2 rounded'>Sign Up</button>
                             </form>
                         </TabsContent>
