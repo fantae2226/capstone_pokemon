@@ -5,22 +5,32 @@ import loginIcon from '../../assets/Lock.png';
 import signupIcon from '../../assets/UserPlus.png';
 import pokeball from '../../assets/Pokeball.png';
 import { useState, useEffect } from 'react';
+import supabase from '@/supabase';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function LoginSignup() {
-    const [loginData, setLoginData] = useState({ username: '', password: '' });
+    const [loginData, setLoginData] = useState({ email: '', password: '' });
     const [signupData, setSignupData] = useState({ username: '', email: '', password: '' });
+    const navigate = useNavigate();
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
-        const res = await fetch('http://localhost:8000/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(loginData)
+        
+        const {data, error} = await supabase.auth.signInWithPassword({
+            email: loginData.email, 
+            password: loginData.password
         });
-        const data = await res.json();
-        console.log('Login response:', data);
-    }
+
+        if (error) {
+            console.error('Error logging in:', error);
+            return;
+        }
+
+        console.log('Login successful:', data);
+        navigate('/dashboard');
+        }
+
 
     async function handleSignup(e: React.FormEvent) {
         e.preventDefault();
@@ -61,10 +71,10 @@ export default function LoginSignup() {
                             <form className='flex flex-col gap-4 mt-4' onSubmit={handleLogin}>
                                 <input 
                                     type="text" 
-                                    placeholder='Username' 
+                                    placeholder='Email' 
                                     className='p-2 border rounded'
-                                    value={loginData.username}
-                                    onChange={(e) => setLoginData({...loginData, username: e.target.value})}
+                                    value={loginData.email}
+                                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                                 />
                                 <input 
                                     type="password" 

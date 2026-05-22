@@ -1,16 +1,30 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from './assets/vite.svg'
-// import heroImg from './assets/hero.png'
 import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginSignup from './components/LoginSignup/LoginSignup'
+import Dashboard from './components/Dashboard/Dashboard'
+import {useEffect} from 'react';
+import supabase from './supabase.ts'
 
 function App() {
-  // const [count, setCount] = useState(0)
+  
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        console.log('User signed in:', session);
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
+      }
+    });
+  }, []);
 
   return (
     <>
-      <LoginSignup />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginSignup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
