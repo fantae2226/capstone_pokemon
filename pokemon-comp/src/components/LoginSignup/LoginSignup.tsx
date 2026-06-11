@@ -1,4 +1,3 @@
-import './LoginSignup.css';
 import { HexagonBackground } from '../animate-ui/components/backgrounds/hexagon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../animate-ui/components/radix/tabs';
 import loginIcon from '../../assets/Lock.png';
@@ -69,15 +68,19 @@ export default function LoginSignup() {
                         </TabsList>
                         <TabsContent value="login">
                             <form className='flex flex-col gap-4 mt-4' onSubmit={handleLogin}>
+                                <label htmlFor='login-email' className='w-1 h-2 mr-2'>Email</label>
                                 <input 
-                                    type="text" 
+                                    type="text"
+                                    id='login-email' 
                                     placeholder='Email' 
                                     className='p-2 border rounded'
                                     value={loginData.email}
                                     onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                                 />
+                                <label htmlFor='login-password' className='w-1 h-2 mr-2'>Password</label>
                                 <input 
-                                    type="password" 
+                                    type="password"
+                                    id='login-password' 
                                     placeholder='Password' 
                                     className='p-2 border rounded'
                                     value={loginData.password}
@@ -89,22 +92,28 @@ export default function LoginSignup() {
 
                         <TabsContent value="signup">
                             <form className='flex flex-col gap-4 mt-4' onSubmit={handleSignup}>
+                                <label htmlFor='signup-username' className='w-1 h-2 mr-2'>Username</label>                                                                
                                 <input 
                                     type="text" 
+                                    id='signup-username'
                                     placeholder='Username' 
                                     className='p-2 border rounded'
                                     value={signupData.username}
                                     onChange={(e) => setSignupData({...signupData, username: e.target.value})}
                                 />
+                                <label htmlFor='signup-email' className='w-1 h-2 mr-2'>Email</label>                                
                                 <input 
                                     type="email" 
+                                    id='signup-email'
                                     placeholder='Email' 
                                     className='p-2 border rounded'
                                     value={signupData.email}
                                     onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                                 />
+                                <label htmlFor='signup-password' className='w-1 h-2 mr-2'>Password</label>
                                 <input 
-                                    type="password" 
+                                    type="password"
+                                    id='signup-password' 
                                     placeholder='Password' 
                                     className='p-2 border rounded'
                                     value={signupData.password}

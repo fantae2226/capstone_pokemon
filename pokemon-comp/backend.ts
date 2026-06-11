@@ -31,7 +31,7 @@ app.post('/signup', async (req, res) => {
     }
     console.log('Auth user created: ', data.user?.id);
 
-    //insert data into table
+    //insert data into users table
     const {error: insertError} = await supabase
         .from('users')
         .insert({
