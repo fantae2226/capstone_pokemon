@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 
 
 app.post('/signup', async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, confirmPass } = req.body;
     
     //supabase auth creates user and hashes password
     const {data, error} = await supabase.auth.signUp({

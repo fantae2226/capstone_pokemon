@@ -10,11 +10,37 @@ import { useNavigate } from 'react-router-dom';
 
 export default function LoginSignup() {
     const [loginData, setLoginData] = useState({ email: '', password: '' });
-    const [signupData, setSignupData] = useState({ username: '', email: '', password: '' });
+    const [signupData, setSignupData] = useState({ username: '', email: '', password: '', confirmPassword:'' });
+    const [inputError, setInputError] = useState({ email:'', password:'', confirmPassword:'' })
     const navigate = useNavigate();
 
-    async function handleLogin(e: React.FormEvent) {
+
+    function verifyPassword(e: React.FormEvent) {
         e.preventDefault();
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        const errors = {
+            email: !emailRegex.test(signupData.email)
+                ? 'Please Enter a valid Email Address.'
+                : '',
+            password: !passwordRegex.test(signupData.password)
+                ? 'Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.'
+                : '',
+            confirmPassword: signupData.password !== signupData.confirmPassword
+                ? 'Password does not match the one given above.'
+                : '',
+        };
+
+        setInputError(errors);
+
+        if (errors.email || errors.password || errors.confirmPassword) return;
+
+        handleSignup();
+    }
+
+    async function handleLogin(e: React.FormEvent) {
         
         const {data, error} = await supabase.auth.signInWithPassword({
             email: loginData.email, 
@@ -31,8 +57,7 @@ export default function LoginSignup() {
         }
 
 
-    async function handleSignup(e: React.FormEvent) {
-        e.preventDefault();
+    async function handleSignup() {
         const res = await fetch('http://localhost:8000/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -91,8 +116,8 @@ export default function LoginSignup() {
                         </TabsContent>
 
                         <TabsContent value="signup">
-                            <form className='flex flex-col gap-4 mt-4' onSubmit={handleSignup}>
-                                <label htmlFor='signup-username' className='w-1 h-2 mr-2'>Username</label>                                                                
+                            <form className='flex flex-col gap-4 mt-4' onSubmit={verifyPassword}>
+                                <label htmlFor='signup-username'>Username</label>                                                                
                                 <input 
                                     type="text" 
                                     id='signup-username'
@@ -101,16 +126,19 @@ export default function LoginSignup() {
                                     value={signupData.username}
                                     onChange={(e) => setSignupData({...signupData, username: e.target.value})}
                                 />
-                                <label htmlFor='signup-email' className='w-1 h-2 mr-2'>Email</label>                                
+
+                                <label htmlFor='signup-email'>Email</label>                                
                                 <input 
-                                    type="email" 
+                                    type="text" 
                                     id='signup-email'
                                     placeholder='Email' 
                                     className='p-2 border rounded'
                                     value={signupData.email}
                                     onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                                 />
-                                <label htmlFor='signup-password' className='w-1 h-2 mr-2'>Password</label>
+                                {inputError.email && <p className='text-red-600 text-sm'>{inputError.email}</p>}
+
+                                <label htmlFor='signup-password'>Password</label>
                                 <input 
                                     type="password"
                                     id='signup-password' 
@@ -119,6 +147,19 @@ export default function LoginSignup() {
                                     value={signupData.password}
                                     onChange={(e) => setSignupData({...signupData, password: e.target.value})}
                                 />
+                                {inputError.password && <p className='text-red-600 text-sm'>{inputError.password}</p>}
+
+                                <label htmlFor='signup-confirm-password'>Confirm Password</label>
+                                <input 
+                                    type="text"
+                                    id='signup-confirm-password' 
+                                    placeholder='Confirm Password' 
+                                    className='p-2 border rounded'
+                                    value={signupData.confirmPassword}
+                                    onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
+                                />
+                                {inputError.confirmPassword && <p className='text-red-600 text-sm'>{inputError.confirmPassword}</p>}
+
                                 <button type='submit' className='bg-green-500 text-white py-2 rounded'>Sign Up</button>
                             </form>
                         </TabsContent>
