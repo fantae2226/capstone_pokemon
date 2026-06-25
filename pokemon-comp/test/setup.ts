@@ -1,11 +1,9 @@
-import { beforeAll ,afterEach, vi } from 'vitest';
-import {cleanup} from '@testing-library/react';
+import { beforeAll, afterEach, vi } from 'vitest';
+import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-vi.mock('react-router-dom', () => ({
-    useNavigate: () => vi.fn(),
-}));
-
+// fetch polyfill
+vi.stubGlobal('fetch', vi.fn());
 
 beforeAll(() => {
     class ResizeObserverMock {
@@ -15,10 +13,9 @@ beforeAll(() => {
     }
 
     vi.stubGlobal('ResizeObserver', ResizeObserverMock);
-
 });
 
 afterEach(() => {
     cleanup();
-    vi.clearAllMocks();
+    vi.clearAllMocks(); // this resets fetch AND ResizeObserver mocks between tests
 });
