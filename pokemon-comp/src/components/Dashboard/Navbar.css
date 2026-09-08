@@ -1,0 +1,100 @@
+
+.main_nav{
+    display: flex;
+    justify-content: flex-start;
+    font-family: 'Press Start 2P', 'Times New Roman', Times, serif;
+    align-items: center;
+}
+
+.logo{
+    display: flex;
+    justify-content: center;
+    font-size: 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    border: 2px solid red;
+}
+
+.nav_link {
+    margin: 5px 50px;
+    list-style-type: none;
+    text-align: center;
+}
+
+button{
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.user_wrapper{
+    display: flex;
+    gap: 0.5rem;
+}
+
+.user{
+    width: 50px;
+    height: 50px;
+}
+
+.user_profile{
+    width: 100%;
+    height: 100%;
+    background-color: red;
+    border-radius: 5px;
+}
+
+.username{
+    display: none;
+}
+
+.menu_hamburger {
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: 0.5rem;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 2.25rem;
+    height: 2rem;
+}
+
+.menu_hamburger span {
+    height: 0.4rem;
+    width: 100%;
+    background-color: #000000;
+    border-radius: 0.2rem;
+}
+
+@media (max-width: 480px){
+    .menu_hamburger{
+        display: flex;
+    }
+
+    .main_nav{
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .nav_link{
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+
+    .nav_link button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .user {
+        max-width: fit-content;
+        text-align: center;
+    }
+    .username{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+}
