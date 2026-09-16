@@ -1,9 +1,11 @@
 
 .main_nav{
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     font-family: 'Press Start 2P', 'Times New Roman', Times, serif;
     align-items: center;
+    position: relative;
+    width: 100%;
 }
 
 .logo{
@@ -57,6 +59,7 @@ button{
     justify-content: space-between;
     width: 2.25rem;
     height: 2rem;
+    cursor: pointer;
 }
 
 .menu_hamburger span {
@@ -64,11 +67,15 @@ button{
     width: 100%;
     background-color: #000000;
     border-radius: 0.2rem;
+    display: block;
 }
 
-@media (max-width: 480px){
+@media (max-width: 768px){
     .menu_hamburger{
         display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        height: auto;
     }
 
     .main_nav{
@@ -96,5 +103,8 @@ button{
         display: flex;
         flex-direction: row;
         align-items: center;
+    }
+    .main_nav.menu-open .nav_link {
+        display: block;
     }
 }

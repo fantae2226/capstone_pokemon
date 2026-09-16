@@ -1,9 +1,10 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginSignup from './components/LoginSignup/LoginSignup'
-import Dashboard from './components/Dashboard/Dashboard'
+import LoginSignup from './components/LoginSignup/LoginSignup';
+import Dashboard from './components/Dashboard/Dashboard';
+import UserSettings from './components/UserSettings/UserSettings.tsx';
 import {useEffect} from 'react';
-import supabase from './supabase.ts'
+import supabase from './supabase.ts';
 
 function App() {
   
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginSignup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path='/user-settings' element={<UserSettings />} />
         </Routes>
       </BrowserRouter>
     </>
