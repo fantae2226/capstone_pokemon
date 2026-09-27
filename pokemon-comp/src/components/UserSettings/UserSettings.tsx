@@ -2,6 +2,8 @@ import { HexagonBackground } from '../animate-ui/components/backgrounds/hexagon'
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
+import PokeTeamContainer from '../EditTeams/PokeTeamContainer';
+
 import User from '../../assets/User.png';
 import Edit from '../../assets/Edit.png';
 
@@ -18,12 +20,18 @@ export default function UserSettings(){
         e.preventDefault();
     }
 
+    async function importTeam(e: React.FormEvent) {
+        e.preventDefault();
+    }
+
     return(
         <div className='relative min-h-screen'>
             <HexagonBackground className='fixed inset-0'/>
             <div className='relative'>
                <div className='user_settings_nav'>
-                    <button className='return_btn'>
+                    <button className='return_btn'
+                        onClick={() => navigate("/dashboard")}
+                    >
                         ⇐
                     </button>
                     <button className='manage_userprofile'
@@ -59,7 +67,7 @@ export default function UserSettings(){
                             </div>
                             <form className='user_info_form' onSubmit={editUserProfile}>
 
-                                <label htmlFor='username' className='username_input_label'>Username</label>
+                                <label htmlFor='username' className='username_input_label'>Username: </label>
                                 <input 
                                     type="text"
                                     id='username' 
@@ -68,7 +76,7 @@ export default function UserSettings(){
                                     value="Test_User_1"
                                 />
                                 
-                                <label htmlFor='email' className='email_input_label'>Email</label>
+                                <label htmlFor='email' className='email_input_label'>Email: </label>
                                 <input 
                                     type="text"
                                     id='email' 
@@ -77,7 +85,7 @@ export default function UserSettings(){
                                     value="fake_email@gmail.com"
                                 />
 
-                                <label htmlFor='password' className='password_input_label'>Password</label>
+                                <label htmlFor='password' className='password_input_label'>Password: </label>
                                 <input 
                                     type="text"
                                     id='password' 
@@ -93,13 +101,29 @@ export default function UserSettings(){
 
                     {tab === "pokemon_teams" && 
                         <div className="pokemon_teams_container">
-                            Teams will go here!
+                            <p>Last Edited Teams</p>
+                            <div className="poke_team_container">A</div>
+                            <div className="poke_team_container">B</div>
+                            <div className="poke_team_container">C</div>
+                            <PokeTeamContainer 
+                                title='Trick Room'
+                                last_modified={new Date("2026-09-16")} />
                         </div>
                     }
                     
                     {tab === "import_team" && 
                         <div className="import_teams_container">
-                            Imports will go here!
+                            <p>Insert your Team import code here</p>
+                            <form className='import_form' onSubmit={importTeam}>
+                                <label htmlFor='import' className='import_input_label'>Import Code: </label>
+                                <input 
+                                    type= "number"
+                                    id='import' 
+                                    placeholder='Import' 
+                                    className='import_input'
+                                    value="000928925"
+                                />
+                            </form>
                         </div>
                     }
                 </div>

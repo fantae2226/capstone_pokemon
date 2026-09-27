@@ -3,9 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../animate-ui/componen
 import loginIcon from '../../assets/Lock.png';
 import signupIcon from '../../assets/UserPlus.png';
 import pokeball from '../../assets/Pokeball.png';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import supabase from '@/supabase';
 import { useNavigate } from 'react-router-dom';
+import './LoginSignup.css';
 
 
 export default function LoginSignup() {
@@ -42,9 +43,9 @@ export default function LoginSignup() {
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
-        
+
         const {data, error} = await supabase.auth.signInWithPassword({
-            email: loginData.email, 
+            email: loginData.email,
             password: loginData.password
         });
 
@@ -55,7 +56,7 @@ export default function LoginSignup() {
 
         console.log('Login successful:', data);
         navigate('/dashboard');
-        }
+    }
 
 
     async function handleSignup() {
@@ -69,105 +70,100 @@ export default function LoginSignup() {
     }
 
 
-
-
-
     return (
-        <div className="relative min-h-screen">
-                <HexagonBackground className='fixed inset-0'/>
-                
-                <div className='relative z-10 pointer-events-none'>
-                    <div className='flex items-center w-fit mx-auto mt-10 pointer-events-auto'>
-                        <img src={pokeball} alt="Pokeball" className="w-10 h-10"/>
-                        <div className='ml-2 text-2xl font-bold text-gray-800 dark:text-gray-200'>PokeComp</div>
-                    </div>
-                    <Tabs defaultValue="login" className="w-full max-w-md mx-auto mt-20 pointer-events-auto">
-                        <TabsList className="bg-gray-200 dark:bg-gray-700 rounded-lg p-1 w-full">
-                            <TabsTrigger value="login">
-                                <img src={loginIcon} alt="Login Icon" className=" w-5 h-5 mr-2"/>
-                                Login
-                            </TabsTrigger>
-                            <TabsTrigger value="signup">
-                                <img src={signupIcon} alt="Sign Up Icon" className="w-5 h-5 mr-2"/>
-                                Sign Up
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="login">
-                            <form className='flex flex-col gap-4 mt-4' onSubmit={handleLogin}>
-                                <label htmlFor='login-email' className='w-1 h-2 mr-2'>Email</label>
-                                <input 
-                                    type="text"
-                                    id='login-email' 
-                                    placeholder='Email' 
-                                    className='p-2 border rounded'
-                                    value={loginData.email}
-                                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                                />
-                                <label htmlFor='login-password' className='w-1 h-2 mr-2'>Password</label>
-                                <input 
-                                    type="password"
-                                    id='login-password' 
-                                    placeholder='Password' 
-                                    className='p-2 border rounded'
-                                    value={loginData.password}
-                                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                                />
-                                <button type='submit' className='bg-blue-500 text-white py-2 rounded'>Login</button>
-                            </form>
-                        </TabsContent>
+        <div className="login-page">
+            <HexagonBackground className="login-hexagon-bg"/>
 
-                        <TabsContent value="signup">
-                            <form className='flex flex-col gap-4 mt-4' onSubmit={verifyPassword}>
-                                <label htmlFor='signup-username'>Username</label>                                                                
-                                <input 
-                                    type="text" 
-                                    id='signup-username'
-                                    placeholder='Username' 
-                                    className='p-2 border rounded'
-                                    value={signupData.username}
-                                    onChange={(e) => setSignupData({...signupData, username: e.target.value})}
-                                />
-
-                                <label htmlFor='signup-email'>Email</label>                                
-                                <input 
-                                    type="text" 
-                                    id='signup-email'
-                                    placeholder='Email' 
-                                    className='p-2 border rounded'
-                                    value={signupData.email}
-                                    onChange={(e) => setSignupData({...signupData, email: e.target.value})}
-                                />
-                                {inputError.email && <p className='text-red-600 text-sm'>{inputError.email}</p>}
-
-                                <label htmlFor='signup-password'>Password</label>
-                                <input 
-                                    type="password"
-                                    id='signup-password' 
-                                    placeholder='Password' 
-                                    className='p-2 border rounded'
-                                    value={signupData.password}
-                                    onChange={(e) => setSignupData({...signupData, password: e.target.value})}
-                                />
-                                {inputError.password && <p className='text-red-600 text-sm'>{inputError.password}</p>}
-
-                                <label htmlFor='signup-confirm-password'>Confirm Password</label>
-                                <input 
-                                    type="text"
-                                    id='signup-confirm-password' 
-                                    placeholder='Confirm Password' 
-                                    className='p-2 border rounded'
-                                    value={signupData.confirmPassword}
-                                    onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
-                                />
-                                {inputError.confirmPassword && <p className='text-red-600 text-sm'>{inputError.confirmPassword}</p>}
-
-                                <button type='submit' className='bg-green-500 text-white py-2 rounded'>Sign Up</button>
-                            </form>
-                        </TabsContent>
-                    </Tabs>
+            <div className="login-content">
+                <div className="login-logo">
+                    <img src={pokeball} alt="Pokeball"/>
+                    <div className="login-logo-text">PokeComp</div>
                 </div>
+                <Tabs defaultValue="login" className="login-tabs">
+                    <TabsList className="login-tabs-list">
+                        <TabsTrigger value="login">
+                            <img src={loginIcon} alt="Login Icon" className="login-tab-icon"/>
+                            Login
+                        </TabsTrigger>
+                        <TabsTrigger value="signup">
+                            <img src={signupIcon} alt="Sign Up Icon" className="login-tab-icon"/>
+                            Sign Up
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="login">
+                        <form className="login-form" onSubmit={handleLogin}>
+                            <label htmlFor="login-email" className="login-label">Email</label>
+                            <input
+                                type="text"
+                                id="login-email"
+                                placeholder="Email"
+                                className="login-input"
+                                value={loginData.email}
+                                onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                            />
+                            <label htmlFor="login-password" className="login-label">Password</label>
+                            <input
+                                type="password"
+                                id="login-password"
+                                placeholder="Password"
+                                className="login-input"
+                                value={loginData.password}
+                                onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                            />
+                            <button type="submit" className="login-submit-btn">Login</button>
+                        </form>
+                    </TabsContent>
 
-            
+                    <TabsContent value="signup">
+                        <form className="login-form" onSubmit={verifyPassword}>
+                            <label htmlFor="signup-username">Username</label>
+                            <input
+                                type="text"
+                                id="signup-username"
+                                placeholder="Username"
+                                className="login-input"
+                                value={signupData.username}
+                                onChange={(e) => setSignupData({...signupData, username: e.target.value})}
+                            />
+
+                            <label htmlFor="signup-email">Email</label>
+                            <input
+                                type="text"
+                                id="signup-email"
+                                placeholder="Email"
+                                className="login-input"
+                                value={signupData.email}
+                                onChange={(e) => setSignupData({...signupData, email: e.target.value})}
+                            />
+                            {inputError.email && <p className="login-error">{inputError.email}</p>}
+
+                            <label htmlFor="signup-password">Password</label>
+                            <input
+                                type="password"
+                                id="signup-password"
+                                placeholder="Password"
+                                className="login-input"
+                                value={signupData.password}
+                                onChange={(e) => setSignupData({...signupData, password: e.target.value})}
+                            />
+                            {inputError.password && <p className="login-error">{inputError.password}</p>}
+
+                            <label htmlFor="signup-confirm-password">Confirm Password</label>
+                            <input
+                                type="text"
+                                id="signup-confirm-password"
+                                placeholder="Confirm Password"
+                                className="login-input"
+                                value={signupData.confirmPassword}
+                                onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
+                            />
+                            {inputError.confirmPassword && <p className="login-error">{inputError.confirmPassword}</p>}
+
+                            <button type="submit" className="signup-submit-btn">Sign Up</button>
+                        </form>
+                    </TabsContent>
+                </Tabs>
+            </div>
         </div>
     );
 }

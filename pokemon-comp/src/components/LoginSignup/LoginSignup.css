@@ -1,0 +1,112 @@
+.login-page {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-hexagon-bg {
+    position: fixed;
+    inset: 0;
+}
+
+.login-content {
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2.5rem;
+    pointer-events: auto;
+}
+
+.login-logo img {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.login-logo-text {
+    margin-left: 0.5rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.dark .login-logo-text {
+    color: #e5e7eb;
+}
+
+.login-tabs {
+    width: 100%;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5rem;
+    pointer-events: auto;
+}
+
+.login-tabs-list {
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    width: 100%;
+}
+
+.dark .login-tabs-list {
+    background-color: #374151;
+}
+
+.login-tab-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.login-label {
+    width: 0.25rem;
+    height: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.login-input {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+}
+
+.login-error {
+    color: #dc2626;
+    font-size: 0.875rem;
+}
+
+.login-submit-btn {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.5rem 0;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+}
+
+.signup-submit-btn {
+    background-color: #22c55e;
+    color: white;
+    padding: 0.5rem 0;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+}

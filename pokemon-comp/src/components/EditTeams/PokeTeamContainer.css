@@ -1,0 +1,147 @@
+/* ==========================================================================
+   PokeTeamContainer.css
+   Card component for displaying a single Pokémon team with sprite grid
+   ========================================================================== */
+
+:root {
+  --team-bg: rgba(255, 255, 255, 0.04);
+  --team-border: rgba(255, 255, 255, 0.08);
+  --team-border-hover: rgba(108, 140, 255, 0.4);
+  --team-surface: rgba(0, 0, 0, 0.25);
+  --team-surface-hover: rgba(255, 255, 255, 0.08);
+  --team-accent: #6c8cff;
+  --team-danger: #ff6b6b;
+  --team-danger-hover: #ff8a8a;
+  --team-text: #f2f3f7;
+  --team-text-muted: #9aa0ae;
+  --team-radius: 14px;
+  --team-radius-sm: 8px;
+  --team-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.team_container {
+  background: var(--team-bg);
+  border: 1px solid var(--team-border);
+  border-radius: var(--team-radius);
+  box-shadow: var(--team-shadow);
+  padding: 1.25rem 1.5rem;
+  color: var(--team-text);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.team_container:hover {
+  border-color: var(--team-border-hover);
+}
+
+/* ---------- Header ---------- */
+
+.team_container_header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.team_container_title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--team-text);
+  flex-shrink: 0;
+}
+
+.team_container_date {
+  font-size: 0.8rem;
+  color: var(--team-text-muted);
+  margin-right: auto;
+}
+
+.edit_btn,
+.delete_btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--team-border);
+  border-radius: var(--team-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.edit_btn:hover {
+  background: var(--team-surface-hover);
+  border-color: var(--team-accent);
+}
+
+.delete_btn:hover {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: var(--team-danger);
+}
+
+.edit_icon,
+.delete_icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+.edit_btn:hover .edit_icon,
+.delete_btn:hover .delete_icon {
+  opacity: 1;
+}
+
+/* ---------- Sprite grid ---------- */
+
+.team_container_sprites {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.6rem;
+}
+
+.team_container_sprites img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: var(--team-surface);
+  border: 1px solid var(--team-border);
+  border-radius: var(--team-radius-sm);
+  padding: 0.4rem;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.team_container_sprites img:hover {
+  border-color: var(--team-accent);
+  transform: translateY(-2px);
+}
+
+/* Empty slots (default pokeball) render slightly dimmer to distinguish
+   them from filled team members */
+.team_container_sprites img[alt="Empty team slot"] {
+  opacity: 0.45;
+}
+
+.team_container_sprites img[alt="Empty team slot"]:hover {
+  opacity: 0.7;
+  border-color: var(--team-border);
+  transform: none;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .team_container_sprites {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .team_container_header {
+    flex-wrap: wrap;
+  }
+
+  .team_container_date {
+    order: 3;
+    flex-basis: 100%;
+    margin-right: 0;
+  }
+}
