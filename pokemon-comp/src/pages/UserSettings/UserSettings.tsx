@@ -1,8 +1,9 @@
-import { HexagonBackground } from '../animate-ui/components/backgrounds/hexagon';
+import { HexagonBackground } from '../../components/animate-ui/components/backgrounds/hexagon';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import supabase from '@/lib/supabase';
 
-import PokeTeamContainer from '../EditTeams/PokeTeamContainer';
+import PokeTeamContainer from '../../components/EditTeams/PokeTeamContainer';
 
 import User from '../../assets/User.png';
 import Edit from '../../assets/Edit.png';
@@ -49,7 +50,9 @@ export default function UserSettings(){
                     >
                         Import New Team
                     </button>
-                    <button className='logout_btn'>
+                    <button className='logout_btn'
+                            onClick={() => supabase.auth.signOut()}
+                    >
                         Logout
                     </button>
                </div>

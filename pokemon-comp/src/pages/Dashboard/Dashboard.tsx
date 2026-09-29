@@ -1,4 +1,4 @@
-import { HexagonBackground } from '../animate-ui/components/backgrounds/hexagon';
+import { HexagonBackground } from '@/components/animate-ui/components/backgrounds/hexagon';
 import Navbar from './Navbar';
 
 export default function Dashboard() {

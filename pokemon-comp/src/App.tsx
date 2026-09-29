@@ -1,33 +1,32 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginSignup from './components/LoginSignup/LoginSignup';
-import Dashboard from './components/Dashboard/Dashboard';
-import UserSettings from './components/UserSettings/UserSettings.tsx';
-import {useEffect} from 'react';
-import supabase from './supabase.ts';
+import { AuthProvider } from './context/AuthContext.tsx';
+import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards.tsx';
+import LoginSignup from './pages/LoginSignup/LoginSignup.tsx';
+import Dashboard from './pages/Dashboard/Dashboard';
+import UserSettings from './pages/UserSettings/UserSettings.tsx';
+
 
 function App() {
-  
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        console.log('User signed in:', session);
-      } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
-      }
-    });
-  }, []);
 
   return (
-    <>
+    <AuthProvider>
       <BrowserRouter>
+        
         <Routes>
-          <Route path="/" element={<LoginSignup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path='/user-settings' element={<UserSettings />} />
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/" element={<LoginSignup />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path='/user-settings' element={<UserSettings />} />
+          </Route>
+          
         </Routes>
+      
       </BrowserRouter>
-    </>
+    </AuthProvider>
   )
 }
 

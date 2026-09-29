@@ -1,11 +1,11 @@
-import { HexagonBackground } from '../animate-ui/components/backgrounds/hexagon';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../animate-ui/components/radix/tabs';
+import { HexagonBackground } from '../../components/animate-ui/components/backgrounds/hexagon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/animate-ui/components/radix/tabs';
 import loginIcon from '../../assets/Lock.png';
 import signupIcon from '../../assets/UserPlus.png';
 import pokeball from '../../assets/Pokeball.png';
 import { useState } from 'react';
-import supabase from '@/supabase';
-import { useNavigate } from 'react-router-dom';
+import supabase from '@/lib/supabase';
+// import { useNavigate } from 'react-router-dom';
 import './LoginSignup.css';
 
 
@@ -13,7 +13,7 @@ export default function LoginSignup() {
     const [loginData, setLoginData] = useState({ email: '', password: '' });
     const [signupData, setSignupData] = useState({ username: '', email: '', password: '', confirmPassword:'' });
     const [inputError, setInputError] = useState({ email:'', password:'', confirmPassword:'' })
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
 
     function verifyPassword(e: React.FormEvent) {
@@ -55,7 +55,7 @@ export default function LoginSignup() {
         }
 
         console.log('Login successful:', data);
-        navigate('/dashboard');
+        // navigate('/dashboard');
     }
 
 
