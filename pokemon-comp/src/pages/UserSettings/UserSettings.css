@@ -6,7 +6,7 @@
 :root {
   --settings-bg: rgba(17, 20, 28, 0.72);
   --settings-border: rgba(255, 255, 255, 0.08);
-  --settings-surface: rgba(255, 255, 255, 0.04);
+  --settings-surface: rgba(80, 21, 163, 0.692);
   --settings-surface-hover: rgba(255, 255, 255, 0.08);
   --settings-accent: #6c8cff;
   --settings-accent-hover: #5577f0;
@@ -171,6 +171,63 @@
 .user_info_form input[readonly] {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+/* ---------- Save button + status messages ---------- */
+
+.save_btn {
+  grid-column: 1 / -1;
+  justify-self: end;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--settings-accent);
+  border: none;
+  border-radius: var(--settings-radius-sm);
+  padding: 0.6rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.save_btn:hover {
+  background: var(--settings-accent-hover);
+}
+
+.save_btn:active {
+  transform: translateY(1px);
+}
+
+.save_btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.35);
+}
+
+.save_btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.user_info_form .error,
+.user_info_form .success {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.875rem;
+  border-radius: var(--settings-radius-sm);
+  border: 1px solid;
+}
+
+.user_info_form .error {
+  color: #ffb4b4;
+  background: rgba(255, 90, 90, 0.12);
+  border-color: rgba(255, 90, 90, 0.35);
+}
+
+.user_info_form .success {
+  color: #a8f0c0;
+  background: rgba(80, 200, 120, 0.12);
+  border-color: rgba(80, 200, 120, 0.35);
 }
 
 /* ---------- Pokemon teams tab ---------- */

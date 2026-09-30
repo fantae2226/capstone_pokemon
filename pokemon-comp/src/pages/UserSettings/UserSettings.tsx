@@ -1,7 +1,8 @@
 import { HexagonBackground } from '../../components/animate-ui/components/backgrounds/hexagon';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import supabase from '@/lib/supabase';
+import axios from 'axios';
 
 import PokeTeamContainer from '../../components/EditTeams/PokeTeamContainer';
 
@@ -12,18 +13,93 @@ import './UserSettings.css'
 
 export default function UserSettings(){
     const navigate = useNavigate();
-    
-    type Tab = "user_profile" | "pokemon_teams" | "import_team";
+    const [isEditing, setIsEditing] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [form, setForm] = useState({username: "", email: ""});
+    const [savedForm, setSavedForm] = useState({username: "", email: ""});
+    const [error, setError] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
 
+    type Tab = "user_profile" | "pokemon_teams" | "import_team";
     const [tab, setTab] = useState<Tab>("user_profile");
 
+
+    useEffect(() => {
+        async function loadUser() {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if(!user){
+                setLoading(false);
+                return;
+            }
+
+            const { data: row, error } = await supabase
+                .from('users')
+                .select('username')
+                .eq('id', user.id)
+                .single();
+            
+                if(error) {
+                    console.error(error)
+                }
+
+            const values = {
+                username: row?.username ?? "",
+                email: user.email ?? ""
+            };
+
+            setForm(values);
+            setSavedForm(values);
+            setLoading(false);
+        }
+
+        loadUser();
+
+    }, []);
+
+
+    function handleUserFormChange(e: React.ChangeEvent<HTMLInputElement>){
+        setForm({...form, [e.target.id]: e.target.value });
+    }
+    
     async function editUserProfile(e: React.FormEvent){
         e.preventDefault();
+        setError(null);
+        setMessage(null);
+
+        //if nothing changes, leave edit mode
+        if(form.username === savedForm.username){
+            setIsEditing(false);
+            return;
+        }
+
+        try {
+            const {data: { session }} = await supabase.auth.getSession();
+
+            const { data } = await axios.patch(
+                'http://localhost:8000/user/username',
+                { username: form.username },
+                { headers: { Authorization: `Bearer ${session?.access_token}`}}
+            );
+
+            setForm({ ...form, username: data.username });
+            setSavedForm({ ...savedForm, username: data.username });
+            setIsEditing(false)
+            setMessage('Username updated.');
+        } catch (err) {
+            if(axios.isAxiosError(err)) {
+                setError(err.response?.data?.error ?? 'Something went wrong...');
+            } else {
+                setError('Something went wrong...')
+            }
+        }
     }
 
     async function importTeam(e: React.FormEvent) {
         e.preventDefault();
     }
+
+
 
     return(
         <div className='relative min-h-screen'>
@@ -63,9 +139,14 @@ export default function UserSettings(){
                             <div className='account_info_header'> 
                                 <img className='user_icon' src={User} />
                                 <p>Account Information</p>
-                                <button className='edit_account_info_btn'>
-                                    <img className='edit_icon' src={Edit} />
-                                    <p>Edit</p>
+                                <button 
+                                    className='edit_account_info_btn'
+                                    onClick={() => { 
+                                        if(isEditing) setForm(savedForm);
+                                        setIsEditing(!isEditing);}}
+                                >
+                                    <img className='edit_icon' src={Edit}/>
+                                    <p>{isEditing ? "Cancel" : "Edit"}</p>
                                 </button>
                             </div>
                             <form className='user_info_form' onSubmit={editUserProfile}>
@@ -76,16 +157,19 @@ export default function UserSettings(){
                                     id='username' 
                                     placeholder='Username' 
                                     className='username_input'
-                                    value="Test_User_1"
+                                    value={form.username}
+                                    onChange={handleUserFormChange}
+                                    readOnly={!isEditing}
                                 />
                                 
                                 <label htmlFor='email' className='email_input_label'>Email: </label>
                                 <input 
-                                    type="text"
+                                    type="email"
                                     id='email' 
                                     placeholder='Email' 
                                     className='email_input'
-                                    value="fake_email@gmail.com"
+                                    value={form.email}
+                                    readOnly
                                 />
 
                                 <label htmlFor='password' className='password_input_label'>Password: </label>
@@ -94,9 +178,13 @@ export default function UserSettings(){
                                     id='password' 
                                     placeholder='Password' 
                                     className='password_input'
-                                    value="Random_pass"
+                                    value="*************"
+                                    readOnly={!isEditing}
                                 />
 
+                                {isEditing && <button type="submit" className='save_btn'>Save</button>}
+                                {error && <p className='error'>{error}</p>}
+                                {message && <p className='success'>{message}</p>}
                             </form>
                             
                         </div>
