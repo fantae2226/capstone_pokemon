@@ -11,6 +11,7 @@ import User from '../../assets/User.png';
 import Edit from '../../assets/Edit.png';
 
 import './UserSettings.css'
+import { validateEmail, validatePassword } from '@/lib/validation';
 
 export default function UserSettings(){
     const navigate = useNavigate();
@@ -23,8 +24,19 @@ export default function UserSettings(){
     
     const [form, setForm] = useState({username: "", email: ""});
     const [savedForm, setSavedForm] = useState({username: "", email: ""});
+
+    
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    
+    const [showSecurity, setShowSecurity] = useState(false);
+    const [secError, setSecError] = useState<string | null>(null);
+    const [secForm, setSecForm] = useState({
+        newEmail: "",
+        newPassword: "",
+        confirmPassword: "",
+        currentPassword: ""
+    });
 
     type Tab = "user_profile" | "pokemon_teams" | "import_team";
     const [tab, setTab] = useState<Tab>("user_profile");
@@ -64,6 +76,10 @@ export default function UserSettings(){
     function handleUserFormChange(e: React.ChangeEvent<HTMLInputElement>){
         setForm({...form, [e.target.id]: e.target.value });
     }
+
+    function handleSecFormChange(e: React.ChangeEvent<HTMLInputElement>){
+        setSecForm({ ...secForm, [e.target.id]: e.target.value} );
+    }
     
     async function editUserProfile(e: React.FormEvent){
         e.preventDefault();
@@ -96,6 +112,57 @@ export default function UserSettings(){
                 setError('Something went wrong...')
             }
         }
+    }
+
+    async function chagneCredentials(e: React.FormEvent){
+        e.preventDefault();
+        setSecError(null);
+
+        const newEmail = secForm.newEmail.trim();
+        const emailChanging = newEmail !== "" && newEmail !== savedForm.email;
+        const passwordChanging = secForm.newPassword !== "";
+
+        if (!emailChanging && !passwordChanging){
+            return setSecError('Enter a new email or password.');
+        }
+        if(emailChanging) {
+            const emailError = validateEmail(newEmail);
+            if(emailError) return setSecError(emailError);
+        }
+        if(passwordChanging) {
+            const passwordError = validatePassword(secForm.newPassword);
+            if(passwordError) return setSecError(passwordError);
+        }
+        if(passwordChanging && secForm.newPassword !== secForm.confirmPassword) {
+            return setSecError("New passwords don't match.");
+        }
+        if (secForm.currentPassword === "") {
+            return setSecError('Enter your current password');
+        }
+        
+        try {
+            await axios.patch('http://localhost:8000/user/credentials',
+                {
+                    currentPassword: secForm.currentPassword,
+                    ...(emailChanging && { newEmail }),
+                    ...(passwordChanging && { newPassword: secForm.newPassword })
+                },
+                { headers: { Authorization: `Bearer ${session?.access_token}`} }
+            );
+
+            //backend ended session, clear browser copy
+            await supabase.auth.signOut();
+        } catch (err) {
+            if(axios.isAxiosError(err)){
+                setSecError(err.response?.data?.error ?? 'Something went wrong...');
+            } else{
+                setSecError('Something went wrong');
+            }
+        }
+
+
+
+
     }
 
     async function importTeam(e: React.FormEvent) {
@@ -175,20 +242,47 @@ export default function UserSettings(){
                                     readOnly
                                 />
 
-                                <label htmlFor='password' className='password_input_label'>Password: </label>
-                                <input 
-                                    type="text"
-                                    id='password' 
-                                    placeholder='Password' 
-                                    className='password_input'
-                                    value="*************"
-                                    readOnly={!isEditing}
-                                />
-
                                 {isEditing && <button type="submit" className='save_btn'>Save</button>}
                                 {error && <p className='error'>{error}</p>}
                                 {message && <p className='success'>{message}</p>}
                             </form>
+
+                            <button
+                                type="button"
+                                className='security_toggle_btn'
+                                onClick={() => {
+                                    setShowSecurity(!showSecurity);
+                                    setSecError(null);
+                                    setSecForm({ newEmail: "", newPassword: "", confirmPassword: "", currentPassword: "" });
+                                }}
+                            >
+                                {showSecurity ? "Cancel" : "Change Email or Password"}
+                            </button>
+
+                            {showSecurity && (
+                                <form className='user_info_form security_form' onSubmit={chagneCredentials}>
+                                    <label htmlFor='newEmail'>New Email: </label>
+                                    <input type="email" id='newEmail' placeholder='Leave blank to keep current'
+                                        value={secForm.newEmail} onChange={handleSecFormChange} />
+
+                                    <label htmlFor='newPassword'>New Password: </label>
+                                    <input type="password" id='newPassword' placeholder='Leave blank to keep current'
+                                        autoComplete="new-password"
+                                        value={secForm.newPassword} onChange={handleSecFormChange} />
+
+                                    <label htmlFor='confirmPassword'>Confirm Password: </label>
+                                    <input type="password" id='confirmPassword' autoComplete="new-password"
+                                        value={secForm.confirmPassword} onChange={handleSecFormChange} />
+
+                                    <label htmlFor='currentPassword'>Current Password: </label>
+                                    <input type="password" id='currentPassword' autoComplete="current-password"
+                                        value={secForm.currentPassword} onChange={handleSecFormChange} />
+
+                                    <button type="submit" className='save_btn'>Update</button>
+                                    {secError && <p className='error'>{secError}</p>}
+
+                                </form>
+                            )}
                             
                         </div>
                     }

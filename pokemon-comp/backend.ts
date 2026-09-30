@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import supabase from './supabaseClient.ts';
 import supabaseAdmin from './supabaseAdmin.ts';
+import  makeVerifierClient  from './supabaseVerifier.ts';
 import { validateEmail, validatePassword} from './src/lib/validation.ts'
+import { error } from 'console';
 
 
 const PORT = 8000;
@@ -95,9 +97,85 @@ app.patch('/user/username', async(req, res) => {
 
 
 //updates old email and/or password
-app.patch('user/credentials', async (req,res ){
+app.patch('/user/credentials', async (req,res ) => {
+    //verify user is logged in
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ error: 'Not logged in.' });
+    }
+    
+    //check if session is valid
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if(authError || !user){
+        return res.status(401).json({ error: 'Invalid session' });
+    }
+    //check what the user is attempting to update
+    const { currentPassword, newEmail, newPassword } = req.body;
 
-})
+    const cleanEmail = typeof newEmail === 'string' ? newEmail.trim().toLowerCase() : '';
+    const emailChanging = cleanEmail !== '' && cleanEmail !== user.email?.toLowerCase();
+    const passwordChanging = typeof newPassword === 'string' && newPassword.length > 0;
+
+    if(!emailChanging && !passwordChanging) {
+        return res.status(400).json({ error: 'Nothing to change' });
+    }
+
+    if(typeof currentPassword !== 'string' || currentPassword === ''){
+        return res.status(400).json({ error: 'Current password required' });
+    }
+
+    if(emailChanging){
+        const emailError = validateEmail(cleanEmail);
+        if (emailError) return res.status(400).json({ error: emailError });
+    }
+
+    if(passwordChanging) {
+        const passwordError = validatePassword(newPassword);
+        if (passwordError) return res.status(400).json({ error: passwordError });
+    }
+
+    //check if current password is correct
+    const { error: verifyError } = await makeVerifierClient().auth.signInWithPassword({
+        email: user.email!,
+        password: currentPassword
+    });
+    if(verifyError){
+        return res.status(403).json({ error: 'Current password is incorrect' });
+    }
+    
+    //update supababse auth
+    const updates: { email?: string; password?: string; email_confirm?: boolean } = {};
+    if(emailChanging) {
+        updates.email = cleanEmail;
+        updates.email_confirm = true;
+    }
+    if(passwordChanging) {
+        updates.password = newPassword;
+    }
+
+    const {error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, updates);
+    if(updateError){
+        console.error('Error updating credentials:', updateError);
+        return res.status(400).json({ error: updateError.message });
+    }
+
+    //update users table to sync with Subabase Auth
+    if(emailChanging){
+        const { error: tableError } = await supabaseAdmin
+            .from('users')
+            .update({email: cleanEmail })
+            .eq('id', user.id);
+
+        if(tableError) {
+            console.error('Auth email changed but users table update failed:', tableError);
+        }
+    }
+
+    //sign user out of all sessions
+    await supabaseAdmin.auth.admin.signOut(token);
+
+    res.json({ message: 'Credentials updated. Please sign in again' });
+});
 
 
 //starts server on backend port

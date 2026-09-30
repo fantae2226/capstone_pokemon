@@ -230,6 +230,30 @@
   border-color: rgba(80, 200, 120, 0.35);
 }
 
+.security_toggle_btn {
+  margin-top: 1.75rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--settings-text-muted);
+  background: transparent;
+  border: 1px solid var(--settings-border);
+  border-radius: var(--settings-radius-sm);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.security_toggle_btn:hover {
+  background: var(--settings-surface-hover);
+  color: var(--settings-text);
+}
+
+.security_form {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--settings-border);
+}
+
 /* ---------- Pokemon teams tab ---------- */
 
 .pokemon_teams_container > p {
