@@ -5,7 +5,8 @@ import signupIcon from '../../assets/UserPlus.png';
 import pokeball from '../../assets/Pokeball.png';
 import { useState } from 'react';
 import supabase from '@/lib/supabase';
-// import { useNavigate } from 'react-router-dom';
+import { validateEmail, validatePassword } from '@/lib/validation';
+
 import './LoginSignup.css';
 
 
@@ -23,12 +24,8 @@ export default function LoginSignup() {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
         const errors = {
-            email: !emailRegex.test(signupData.email)
-                ? 'Please Enter a valid Email Address.'
-                : '',
-            password: !passwordRegex.test(signupData.password)
-                ? 'Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.'
-                : '',
+            email: validateEmail(signupData.email),
+            password: validatePassword(signupData.password),
             confirmPassword: signupData.password !== signupData.confirmPassword
                 ? 'Password does not match the one given above.'
                 : '',

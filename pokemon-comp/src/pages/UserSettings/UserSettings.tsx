@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import supabase from '@/lib/supabase';
 import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
 
 import PokeTeamContainer from '../../components/EditTeams/PokeTeamContainer';
 
@@ -13,8 +14,13 @@ import './UserSettings.css'
 
 export default function UserSettings(){
     const navigate = useNavigate();
+    const { user, session } = useAuth();
+    const userId = user?.id;
+    const userEmail = user?.email;
+
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
+    
     const [form, setForm] = useState({username: "", email: ""});
     const [savedForm, setSavedForm] = useState({username: "", email: ""});
     const [error, setError] = useState<string | null>(null);
@@ -25,18 +31,15 @@ export default function UserSettings(){
 
 
     useEffect(() => {
+        if(!userId){
+            setLoading(false);
+            return;
+        }
         async function loadUser() {
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if(!user){
-                setLoading(false);
-                return;
-            }
-
             const { data: row, error } = await supabase
                 .from('users')
                 .select('username')
-                .eq('id', user.id)
+                .eq('id', userId)
                 .single();
             
                 if(error) {
@@ -45,7 +48,7 @@ export default function UserSettings(){
 
             const values = {
                 username: row?.username ?? "",
-                email: user.email ?? ""
+                email: userEmail ?? ""
             };
 
             setForm(values);
@@ -55,7 +58,7 @@ export default function UserSettings(){
 
         loadUser();
 
-    }, []);
+    }, [userId, userEmail]);
 
 
     function handleUserFormChange(e: React.ChangeEvent<HTMLInputElement>){
@@ -74,7 +77,7 @@ export default function UserSettings(){
         }
 
         try {
-            const {data: { session }} = await supabase.auth.getSession();
+            // const {data: { session }} = await supabase.auth.getSession();
 
             const { data } = await axios.patch(
                 'http://localhost:8000/user/username',

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import supabase from './supabaseClient.ts';
 import supabaseAdmin from './supabaseAdmin.ts';
+import { validateEmail, validatePassword} from './src/lib/validation.ts'
 
 
 const PORT = 8000;
@@ -92,6 +93,11 @@ app.patch('/user/username', async(req, res) => {
     res.json({username: cleanedData})
 });
 
+
+//updates old email and/or password
+app.patch('user/credentials', async (req,res ){
+
+})
 
 
 //starts server on backend port
