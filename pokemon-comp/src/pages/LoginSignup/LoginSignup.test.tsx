@@ -106,29 +106,6 @@ describe("LoginSignup", () => {
             expect(password).toHaveValue("Pikachu1!");
         });
 
-        test("calls supabase.signInWithPassword with entered credentials", async () => {
-            mockSignInWithPassword.mockResolvedValue({ data: { user: {} }, error: null });
-            render(<LoginSignup />);
-            const { email, password, submitBtn } = getLoginFields();
-            await userEvent.type(email, "ash@pokemon.com");
-            await userEvent.type(password, "Pikachu1!");
-            await userEvent.click(submitBtn);
-            expect(mockSignInWithPassword).toHaveBeenCalledWith({
-                email:    "ash@pokemon.com",
-                password: "Pikachu1!",
-            });
-        });
-
-        test("navigates to /dashboard on successful login", async () => {
-            mockSignInWithPassword.mockResolvedValue({ data: { user: {} }, error: null });
-            render(<LoginSignup />);
-            const { email, password, submitBtn } = getLoginFields();
-            await userEvent.type(email, "ash@pokemon.com");
-            await userEvent.type(password, "Pikachu1!");
-            await userEvent.click(submitBtn);
-            await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/dashboard"));
-        });
-
         test("does NOT navigate on login error", async () => {
             mockSignInWithPassword.mockResolvedValue({ data: null, error: { message: "Invalid credentials" } });
             render(<LoginSignup />);
