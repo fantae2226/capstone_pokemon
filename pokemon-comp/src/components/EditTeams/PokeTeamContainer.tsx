@@ -1,14 +1,11 @@
 import pokeball from '../../assets/Pokeball.png';
 import Edit from '../../assets/Edit.png';
 import Delete from '../../assets/Delete.png'
+import { useNavigate } from 'react-router-dom';
+import type { PokemonImage } from '@/types/pokemon';
 
 import './PokeTeamContainer.css';
 
-interface PokemonImage{
-    id: string;
-    name: string;
-    spriteUrl: string;
-}
 
 interface PokeTeamContainerProps {
     title: string;
@@ -20,7 +17,7 @@ const TEAM_SIZE = 6;
 
 export default function PokeTeamContainer({title, last_modified, pokemon = []} : PokeTeamContainerProps) {
     
-
+    const navigate = useNavigate();
     const slots = Array.from({length: TEAM_SIZE}, (_, i) => pokemon[i] ?? null);
 
     return(
@@ -28,7 +25,9 @@ export default function PokeTeamContainer({title, last_modified, pokemon = []} :
             <div className="team_container_header">
                 <div className="team_container_title">{title}</div>
                 <div className="team_container_date">{last_modified.toLocaleDateString()}</div>
-                <button className='edit_btn'>
+                <button className='edit_btn'
+                        onClick={() => navigate('/team-viewer')}
+                >
                     <img className='edit_icon' src={Edit} />
                 </button>
                 <button className='delete_btn'>

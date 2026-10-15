@@ -5,6 +5,7 @@ import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards.tsx';
 import LoginSignup from './pages/LoginSignup/LoginSignup.tsx';
 import Dashboard from './pages/Dashboard/Dashboard';
 import UserSettings from './pages/UserSettings/UserSettings.tsx';
+import TeamViewer from './pages/TeamViewer/TeamViewer.tsx';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path='/user-settings' element={<UserSettings />} />
+            <Route path='/team-viewer' element={<TeamViewer />} />
           </Route>
           
         </Routes>
