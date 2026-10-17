@@ -8,14 +8,16 @@ import './PokeTeamContainer.css';
 
 
 interface PokeTeamContainerProps {
+    id: string;
     title: string;
     last_modified: Date;
     pokemon?: PokemonImage[];
+    onDelete: (id: string) => void;
 }
 
 const TEAM_SIZE = 6;
 
-export default function PokeTeamContainer({title, last_modified, pokemon = []} : PokeTeamContainerProps) {
+export default function PokeTeamContainer({id, title, last_modified, pokemon = [], onDelete} : PokeTeamContainerProps) {
     
     const navigate = useNavigate();
     const slots = Array.from({length: TEAM_SIZE}, (_, i) => pokemon[i] ?? null);
@@ -30,7 +32,7 @@ export default function PokeTeamContainer({title, last_modified, pokemon = []} :
                 >
                     <img className='edit_icon' src={Edit} />
                 </button>
-                <button className='delete_btn'>
+                <button className='delete_btn' onClick={() => onDelete(id)}>
                     <img className='delete_icon' src={Delete} />
                 </button>
             </div>
