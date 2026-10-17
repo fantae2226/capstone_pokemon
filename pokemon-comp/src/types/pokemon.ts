@@ -19,3 +19,10 @@ export interface TeamPokemon extends PokemonImage{
     };
     moves: (string | null)[]; //always has 4 entries, null for empty move slots
 }
+
+export interface PokemonTeam {
+    id: string;
+    title: string;
+    last_modified: Date;
+    pokemon: PokemonImage[];
+}

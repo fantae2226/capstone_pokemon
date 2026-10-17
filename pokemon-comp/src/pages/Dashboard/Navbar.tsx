@@ -29,7 +29,12 @@ export default function Navbar(){
                     <button value="browse_pokemon">Browse Pokemon</button>
                 </div>
                 <div className='nav_link'>
-                    <button value="browse_teams">Browse Teams</button>
+                    <button className='browse_teams'
+                        value="browse_teams"
+                        onClick={() => navigate('/browse-teams')}
+                    >
+                        Browse Teams
+                    </button>
                 </div>
                 <div className='nav_link'>
                     <button className='user' 

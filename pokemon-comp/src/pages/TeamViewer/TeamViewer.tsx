@@ -12,12 +12,12 @@ const PLACEHOLDER_POKEMON: TeamPokemon = {
     name: 'Placeholdermon',
     spriteUrl: pokeball,
     baseStats: {
-        hp: 100,
-        atk: 100,
-        def: 100,
-        spatk: 100,
+        hp: 30,
+        atk: 70,
+        def: 40,
+        spatk: 170,
         spdef: 100,
-        spe: 100 
+        spe: 250 
     },
     moves: [null, null, null, null]
 };

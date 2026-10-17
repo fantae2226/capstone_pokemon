@@ -1,6 +1,7 @@
-.pokemon_editor { display: grid; grid-template-columns: auto 1fr; gap: 1rem; }
+.pokemon_editor { display: grid; grid-template-columns: minmax(14rem, auto) 1fr; gap: 1rem; }
 .pokemon_editor_left { display: flex; flex-direction: column; align-items: center; }
+.pokemon_editor_stats { width: 100%; }
 .pokemon_editor_moves { display: flex; flex-direction: column; gap: 0.5rem; }
 .stat_row { display: grid; grid-template-columns: 3rem 1fr 3rem; align-items: center; gap: 0.5rem; }
 .stat_bar { background: #ddd; height: 0.5rem; }
-.stat_bar_fill { background: #4caf50; height: 100%; }
+.stat_bar_fill { background: #4caf50; height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
