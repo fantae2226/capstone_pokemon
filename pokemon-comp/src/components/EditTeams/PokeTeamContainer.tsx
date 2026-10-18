@@ -28,7 +28,7 @@ export default function PokeTeamContainer({id, title, last_modified, pokemon = [
                 <div className="team_container_title">{title}</div>
                 <div className="team_container_date">{last_modified.toLocaleDateString()}</div>
                 <button className='edit_btn'
-                        onClick={() => navigate('/team-viewer')}
+                        onClick={() => navigate(`/team-viewer/${id}`)}
                 >
                     <img className='edit_icon' src={Edit} />
                 </button>

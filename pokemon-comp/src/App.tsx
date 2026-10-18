@@ -23,7 +23,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path='/user-settings' element={<UserSettings />} />
-            <Route path='/team-viewer' element={<TeamViewer />} />
+            <Route path='/team-viewer/:teamId' element={<TeamViewer />} />
             <Route path='/browse-teams' element={<BrowseTeams />} />
           </Route>
           

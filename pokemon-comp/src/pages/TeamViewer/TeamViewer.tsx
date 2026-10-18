@@ -1,11 +1,15 @@
 import { HexagonBackground } from "@/components/animate-ui/components/backgrounds/hexagon"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useParams } from "react-router-dom";
 import pokeball from '../../assets/Pokeball.png';
 import type { TeamPokemon } from "@/types/pokemon";
 import PokemonEditor from "@/components/PokemonEditor/PokemonEditor";
 import './TeamViewer.css';
+import supabase from "@/lib/supabase";
+import axios from "axios";
 
 const TEAM_SIZE = 6;
+const API = 'http://localhost:8000';
 
 const PLACEHOLDER_POKEMON: TeamPokemon = {
     id: '0',
@@ -23,8 +27,28 @@ const PLACEHOLDER_POKEMON: TeamPokemon = {
 };
 
 export default function TeamViewer(){
+    const { teamId } = useParams<{ teamId: string}>();
+
     const [team, setTeam] = useState<(TeamPokemon | null)[]>(Array(TEAM_SIZE).fill(null));
     const [selected, setSelected] = useState<number | null>(null);
+
+    async function authHeader(){
+        const {data:{session}} = await supabase.auth.getSession();
+        return {Authorization: `Bearer ${session?.access_token}`};
+    }
+
+    useEffect(() => {
+        async function loadTeam() {
+            try {
+                 const res = await axios.get(`${API}/teams/${teamId}`, {headers: await authHeader()});
+            } catch (error) {
+                console.error('Could not load team', error)
+            }
+        }
+
+        loadTeam();
+
+    }, [teamId]);
 
     function handleAdd(slot: number){
         setTeam(prev => prev.map( (p, i) => (i === slot ? PLACEHOLDER_POKEMON : p) ));

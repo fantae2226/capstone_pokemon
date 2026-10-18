@@ -21,6 +21,10 @@ app.get('/', (req, res) => {
 });
 
 
+/**
+ * USER DATA CALLS
+ */
+
 //signup user to supabase database. Logs data in both Auth and users tables
 app.post('/signup', async (req, res) => {
     const { username, email, password, confirmPass } = req.body;
@@ -176,6 +180,114 @@ app.patch('/user/credentials', async (req,res ) => {
 
     res.json({ message: 'Credentials updated. Please sign in again' });
 });
+
+
+/**
+ * POKEMON DATA CALLS
+ */
+
+//creates new empty team for logged in user if requested
+app.post('/teams', async(req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if(!token) return res.status(401).json({error:'Not Logged In'});
+
+    const { data: {user}, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if(authError || !user) return res.status(401).json({error:'Invalid Session'});
+
+    const now = new Date().toISOString();
+    const {data, error} = await supabaseAdmin
+        .from('teams')
+        .insert({
+            user_id: user.id,
+            name: 'New Team',
+            created_at: now,
+            updated_at: now
+        })
+        .select()
+        .single();
+    
+    if(error){
+        console.error('Error creating team: ', error);
+        return res.status(400).json({error: error.message});
+    }
+
+    res.json(data);
+});
+
+
+//get teams owned by logged in user
+app.get('/teams', async (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if(!token) return res.status(401).json({error:'Not Logged In'});
+
+    const { data: {user}, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if(authError || !user) return res.status(401).json({error:'Invalid Session'});
+
+    const {data, error} = await supabaseAdmin
+        .from('teams')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', {ascending: false});
+    
+    if(error){
+        console.error('Error getting team: ', error);
+        return res.status(400).json({error: error.message});
+    }
+
+    res.json(data);
+});
+
+//deletes one of the logged in user's teams
+app.delete('/teams/:id', async(req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if(!token) return res.status(401).json({error:'Not Logged In'});
+
+    const { data: {user}, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if(authError || !user) return res.status(401).json({error:'Invalid Session'});
+
+    const {data, error} = await supabaseAdmin
+        .from('teams')
+        .delete()
+        .eq('id', req.params.id)
+        .eq('user_id', user.id)
+        .select();
+    
+    if(error){
+        console.error('Error deleting team: ', error);
+        return res.status(400).json({error: error.message});
+    }
+
+    //nothing deleted means the team doesn't exist or belongs to someone else
+    if(!data || data.length === 0){
+        return res.status(404).json({ error: 'Team not found' });
+    }
+
+    res.json({ message: 'Team deleted' });
+
+});
+
+//gets one of the logged in user.s team along with the pokemon
+app.get('/teams/:id', async(req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if(!token) return res.status(401).json({error:'Not Logged In'});
+
+    const { data: {user}, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if(authError || !user) return res.status(401).json({error:'Invalid Session'});
+
+    const {data, error} = await supabaseAdmin
+        .from('teams')
+        .select('*, team_pokemon(*)')
+        .eq('id', req.params.id)
+        .eq('user_id', user.id)
+        .single();
+    
+    if(error || !data){
+        return res.status(404).json({ error: 'Team not found' });
+    }
+
+    res.json(data);
+})
+
 
 
 //starts server on backend port

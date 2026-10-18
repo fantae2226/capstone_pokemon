@@ -18,6 +18,8 @@ export interface TeamPokemon extends PokemonImage{
         spe: number;
     };
     moves: (string | null)[]; //always has 4 entries, null for empty move slots
+    item?: string | null; //held item (ex: leftovers), from PokeAPI
+    availableMoves?: string[]; //pokemon's learnset, from PokeAPI
 }
 
 export interface PokemonTeam {

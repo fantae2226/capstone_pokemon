@@ -1,19 +1,52 @@
 import { HexagonBackground } from "@/components/animate-ui/components/backgrounds/hexagon"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
+import supabase from "@/lib/supabase"
 import PokeTeamContainer from "@/components/EditTeams/PokeTeamContainer"
 import type { PokemonImage, PokemonTeam } from "@/types/pokemon"
 
 
 
 
-
+const API = 'http://localhost:8000';
 //page that holds all of a users teams
 export default function BrowseTeams(){
-    const [teams, setTeams] = useState<PokemonTeam[]>([
-        { id: '1', title: 'Rain Team', last_modified: new Date(), pokemon: [] },
-        { id: '2', title: 'Sun Team',  last_modified: new Date(), pokemon: [] },
-    ]);
-    const [numId, setNumId] = useState<string>('3'); //just for testing
+    // const [teams, setTeams] = useState<PokemonTeam[]>([
+    //     { id: '1', title: 'Rain Team', last_modified: new Date(), pokemon: [] },
+    //     { id: '2', title: 'Sun Team',  last_modified: new Date(), pokemon: [] },
+    // ]);
+    // const [numId, setNumId] = useState<string>('3'); //just for testing
+
+    const [teams, setTeams] = useState<PokemonTeam[]>([]);
+
+    //quick function to do session checking
+    async function authHeader(){
+        const {data:{session}} = await supabase.auth.getSession();
+        return {Authorization: `Bearer ${session?.access_token}`};
+    }
+
+    function rowToTeam(row: any): PokemonTeam {
+        return {
+            id: row.id,
+            title: row.name,
+            last_modified: new Date(row.updated_at),
+            pokemon: []
+        };
+    }
+
+    //load the logged in user's teams when the page opens
+    useEffect(() => {
+        async function loadTeams() {
+            try {
+                const res = await axios.get(`${API}/teams`, {headers: await authHeader() });
+                setTeams(res.data.map(rowToTeam));
+            } catch (error) {
+                console.error('Could not load teams', error);
+            }
+        }
+
+        loadTeams();
+    }, []);
 
     async function fetchPokemonImg(idOrName:number | string):Promise<PokemonImage>{
         
@@ -34,17 +67,8 @@ export default function BrowseTeams(){
     //function to add team 
     async function addTeam(){
         try {
-            const pokemon = await Promise.all(['crobat', 'espurr', 'pikachu', 'diglett', 7, 493].map(fetchPokemonImg))
-
-
-            const newTeam: PokemonTeam = {
-                id: numId,
-                title: `New Team ${numId}`,
-                last_modified: new Date(),
-                pokemon
-            };
-            setTeams(prev => [...prev, newTeam]);
-            setNumId(String(Number(numId) + 1));
+            const res = await axios.post(`${API}/teams`, {}, {headers: await authHeader() });
+            setTeams(prev => [...prev, rowToTeam(res.data)]);
             
         } catch (error) {
             console.error('Could not add team', error)
@@ -52,8 +76,13 @@ export default function BrowseTeams(){
     }
 
     //function to delete games
-    function deleteTeam(id: string){
-        setTeams(prev => prev.filter(team => team.id !== id));
+    async function deleteTeam(id: string){
+        try {
+            await axios.delete(`${API}/teams/${id}`, {headers: await authHeader()});
+            setTeams(prev => prev.filter(team => team.id !== id));
+        } catch (error) {
+            console.error('Could not delete team', error)
+        }
     }
 
     //jsx will contain team container blocks using poketeam container
