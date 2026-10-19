@@ -288,6 +288,92 @@ app.get('/teams/:id', async(req, res) => {
     res.json(data);
 })
 
+//saves a team's name and all its pokemon in one go
+app.put('/teams/:id', async (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if(!token) {
+        return res.status(401).json({ error: 'Not logged in' });
+    }
+
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if(authError || !user){
+        return res.status(401).json({ error: 'Invalid session' });
+    }
+
+    const {name,pokemon} = req.body;
+    if(typeof name !== 'string' || name.trim().length === 0){
+        return res.status(400).json({error: 'Team name is required'});
+    }
+
+    const validPokemon = Array.isArray(pokemon)
+        && pokemon.length <= 6 //are 6 or less pokemon being sent
+        && pokemon.every((p: any) =>
+            Number.isInteger(p.slot) && p.slot >= 0 && p.slot <= 5 && Number.isInteger(p.species_id)) //are the slots between 0-5, and is slot and species id an int
+        && new Set(pokemon.map((p: any) => p.slot)).size === pokemon.length; //did any two or more pokemon claim the same slot
+    if(!validPokemon){
+        return res.status(400).json({error:'Invalid Pokemon Data'});
+    }
+
+    //double chcek team is owned by logged in user
+    const {data: team, error: teamError} = await supabaseAdmin
+        .from('teams')
+        .select('id')
+        .eq('id', req.params.id)
+        .eq('user_id', user.id)
+        .single();
+    if(teamError || !team){
+        return res.status(404).json({error:'Team not found'});
+    }
+
+    //nature, ability, gender, shiny, and evs to be added later
+    const rows = pokemon.map((p: any) => ({
+        team_id: req.params.id,
+        slot: p.slot,
+        species_id: p.species_id,
+        item: p.item ?? null,
+        move1: p.moves?.[0] ?? null,
+        move2: p.moves?.[1] ?? null,
+        move3: p.moves?.[2] ?? null,
+        move4: p.moves?.[3] ?? null
+    }));
+
+    //insert new slots / update existing ones (unique on team_id + slot)
+    if(rows.length > 0){
+        const {error: upsertError} = await supabaseAdmin
+            .from('team_pokemon')
+            .upsert(rows, {onConflict: 'team_id,slot'});
+        if(upsertError){
+            console.error('Error saving pokemon:', upsertError);
+            return res.status(400).json({error: upsertError.message});
+        }
+    }
+
+    //remove pokemon from any slot the user emptied
+    let removeQuery = supabaseAdmin.from('team_pokemon').delete().eq('team_id', req.params.id);
+    if(rows.length > 0){
+        removeQuery = removeQuery.not('slot', 'in', `(${rows.map((r: any) => r.slot).join(',')})`);
+    }
+
+    const {error: removeError} = await removeQuery;
+    if(removeError){
+        console.error('Error removing pokemon:', removeError);
+        return res.status(400).json({error: removeError.message});
+    }
+
+    //update the name and the modified date
+    const {error: updateError} = await supabaseAdmin
+        .from('teams')
+        .update({ name: name.trim(), updated_at: new Date().toISOString() })
+        .eq('id', req.params.id);
+    
+    if(updateError){
+        console.error('Error updating team:', updateError);
+        return res.status(400).json({error: updateError.message});
+    }
+
+    res.json({message: 'Team Saved'});
+})
+
 
 
 //starts server on backend port
