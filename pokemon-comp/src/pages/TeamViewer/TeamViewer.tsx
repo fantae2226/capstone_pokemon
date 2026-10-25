@@ -5,6 +5,7 @@ import pokeball from '../../assets/Pokeball.png';
 import type { TeamPokemon } from "@/types/pokemon";
 import PokemonEditor from "@/components/PokemonEditor/PokemonEditor";
 import SearchPicker from "@/components/SearchPicker/SearchPicker";
+import Modal from "@/components/Modal/Modal";
 import './TeamViewer.css';
 import supabase from "@/lib/supabase";
 import axios from "axios";
@@ -60,6 +61,7 @@ export default function TeamViewer(){
     const [team, setTeam] = useState<(TeamPokemon | null)[]>(Array(TEAM_SIZE).fill(null));
     const [teamName, setTeamName] = useState('');
     const [selected, setSelected] = useState<number | null>(null);
+    const [draft, setDraft] = useState<TeamPokemon | null>(null);
 
     const [pickingSlot, setPickingSlot] = useState<number|null>(null);
     const [allPokemonNames, setAllPokemonNames] = useState<string[]>([]);
@@ -118,6 +120,22 @@ export default function TeamViewer(){
         loadNameLists();
     }, []);
 
+    function openEditor(slot: number, pokemon: TeamPokemon){
+        setDraft({ ...pokemon });
+        setSelected(slot);
+    }
+
+    function closeEditor(){
+        setSelected(null);
+        setDraft(null);
+    }
+
+    function saveEditor(){
+        if(selected === null || !draft) return;
+        setTeam(prev => prev.map( (p, i) => (i === selected ? draft : p) ));
+        closeEditor();
+    }
+
     function handleAdd(slot: number){
         setPickingSlot(slot);
     };
@@ -129,17 +147,17 @@ export default function TeamViewer(){
         try {
             const pokemon = await fetchPokemon(name);
             setTeam(prev => prev.map( (p, i) => (i === slot ? pokemon : p) ));
-            setSelected(slot);
+            openEditor(slot, pokemon);
             setPickingSlot(null);
         } catch (error) {
             console.error('Could not load pokemon', error)
         }
     }
 
-    //merges any user changes (moves, items) into the pokemon of 1 slot
-    function updatePokemon(slot: number, changes: Partial<TeamPokemon>){
-        setTeam(prev => prev.map( (p, i) => (i === slot && p ? {...p, ...changes} : p) ));
-    }
+    // //merges any user changes (moves, items) into the pokemon of 1 slot
+    // function updatePokemon(slot: number, changes: Partial<TeamPokemon>){
+    //     setTeam(prev => prev.map( (p, i) => (i === slot && p ? {...p, ...changes} : p) ));
+    // }
 
     function handleDelete(slot: number){
         setTeam(prev => prev.map( (p, i) => (i === slot ? null : p) ));
@@ -166,7 +184,7 @@ export default function TeamViewer(){
         }
     }
 
-    const selectedPokemon = selected !== null ? team[selected] : null;
+    // const selectedPokemon = selected !== null ? team[selected] : null;
 
 
     return(
@@ -192,7 +210,7 @@ export default function TeamViewer(){
                                 className={`team_slot ${selected === i ? 'team_slot_selected' : ''}`}
 
                                 // temporary guard, will be lifted later to lead to pokemon customizer
-                                onClick={() => p && setSelected(i)}
+                                onClick={() => p && openEditor(i, p)}
                             >
                                 <img src={p ? p.spriteUrl : pokeball} alt={p ? p.name : 'Empty team slot'} />
 
@@ -219,15 +237,17 @@ export default function TeamViewer(){
                     )}
                     {/* Pokemon Editor Data */}
 
-                    { selectedPokemon && selected !== null && (
-                        <PokemonEditor
-                            key={selected}
-                            pokemon={selectedPokemon}
-                            onChange={changes => updatePokemon(selected, changes)}
-                            itemOptions={allItemNames}
-                        />
+                    { selected !== null && draft && (
+                        <Modal onClose={closeEditor}>
+                            <PokemonEditor
+                                pokemon={draft}
+                                onChange={changes => setDraft(prev => (prev ? {...prev, ...changes} : prev))}
+                                itemOptions={allItemNames}
+                            />
+                            <button onClick={saveEditor}>Save</button>
+                            <button onClick={closeEditor}>Cancel</button>
+                        </Modal>
                     )}
-
 
 
                 </div>
