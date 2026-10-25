@@ -6,6 +6,8 @@ import type { TeamPokemon } from "@/types/pokemon";
 import PokemonEditor from "@/components/PokemonEditor/PokemonEditor";
 import SearchPicker from "@/components/SearchPicker/SearchPicker";
 import Modal from "@/components/Modal/Modal";
+import PokemonBrowser from "@/components/PokemonBrowser/PokemonBrowser";
+import type { PokemonSummary } from "@/types/pokemon";
 import './TeamViewer.css';
 import supabase from "@/lib/supabase";
 import axios from "axios";
@@ -13,20 +15,6 @@ import axios from "axios";
 const TEAM_SIZE = 6;
 const API = 'http://localhost:8000';
 
-// const PLACEHOLDER_POKEMON: TeamPokemon = {
-//     id: '0',
-//     name: 'Placeholdermon',
-//     spriteUrl: pokeball,
-//     baseStats: {
-//         hp: 30,
-//         atk: 70,
-//         def: 40,
-//         spatk: 170,
-//         spdef: 100,
-//         spe: 250 
-//     },
-//     moves: [null, null, null, null]
-// };
 
 //function to read data from PokeAPI and shap it into a TeamPokemon
 async function fetchPokemon(idOrName:number | string): Promise<TeamPokemon> {
@@ -54,6 +42,53 @@ async function fetchPokemon(idOrName:number | string): Promise<TeamPokemon> {
     };
 }
 
+const GRAPHQL_URL = 'https://graphql.pokeapi.co/v1beta2';
+const SPRITE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home';
+
+let pokemonTableCache: Promise<PokemonSummary[]> | null = null;
+
+//finds one stat.s value in the rawGraphQL stat list, 0 if missing
+function findStat(rawStats: any[], apiName: string): number {
+    return rawStats.find(s => s.stat.name === apiName)?.base_stat ?? 0;
+}
+
+//turns one raw GraphQL pokemon into the shape the table uses
+function toSummary(raw: any): PokemonSummary {
+    return {
+        id: String(raw.id),
+        name: raw.name,
+        spriteUrl: `${SPRITE_URL}/${raw.id}.png`,
+        types: raw.pokemontypes.map((t: any) => t.type.name),
+        baseStats: {
+            hp: findStat(raw.pokemonstats, 'hp'),
+            atk: findStat(raw.pokemonstats, 'attack'),
+            def: findStat(raw.pokemonstats, 'defense'),
+            spatk: findStat(raw.pokemonstats, 'special-attack'),
+            spdef: findStat(raw.pokemonstats, 'special-defense'),
+            spe: findStat(raw.pokemonstats, 'speed')
+        }
+    };
+}
+
+function fetchAllPokemon(): Promise<PokemonSummary[]> {
+    if(!pokemonTableCache) {
+        pokemonTableCache = (async () => {
+            const res = await axios.post(GRAPHQL_URL, { query: `{
+                    pokemon(order_by: {id: asc}) {
+                        id
+                        name
+                        pokemontypes(order_by: {slot: asc}) { type { name } }
+                        pokemonstats {base_stat stat { name } }
+                    }
+                }`});
+            const json = res.data;
+            if(json.errors) throw new Error(json.errors[0].message);
+            return json.data.pokemon.map(toSummary);
+
+        })().catch(error => { pokemonTableCache = null; throw error; });
+    }
+    return pokemonTableCache;
+}
 
 export default function TeamViewer(){
     const { teamId } = useParams<{ teamId: string}>();

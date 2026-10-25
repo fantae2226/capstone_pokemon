@@ -28,3 +28,8 @@ export interface PokemonTeam {
     last_modified: Date;
     pokemon: PokemonImage[];
 }
+
+export interface PokemonSummary extends PokemonImage{
+    types: string[];
+    baseStats: TeamPokemon['baseStats'];
+}
