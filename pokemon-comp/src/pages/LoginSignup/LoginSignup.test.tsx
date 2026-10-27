@@ -14,7 +14,7 @@ vi.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
 }));
 
-vi.mock("@/supabase", () => ({
+vi.mock("@/lib/supabase", () => ({
     default: {
         auth: {
             signInWithPassword: mockSignInWithPassword,
