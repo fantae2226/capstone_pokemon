@@ -6,6 +6,7 @@
   "scripts": {
     "dev:frontend": "vite",
     "dev:backend": "npx tsx watch backend.ts",
+    "start": "npx tsx watch backend.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
