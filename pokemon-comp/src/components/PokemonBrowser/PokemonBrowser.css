@@ -1,2 +1,13 @@
 .pokemon_browser { width: min(60rem, 85vw); }
 .table_scroll { max-height: 60vh; overflow: auto; }
+.table_scroll th { position: sticky; top: 0; z-index: 1; background: #ffffff; text-align: left; cursor: pointer; user-select: none; }
+.table_scroll tbody tr { cursor: pointer; }
+.table_scroll tbody tr:hover { background: #f3f4f6; }
+
+.filter_chips { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; min-height: 1.75rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.5rem; border-radius: 999px; background: #e5e7eb; text-transform: capitalize; }
+
+.type_picker { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+.type_btn { text-transform: capitalize; }
+.type_btn_active { outline: 2px solid #000000; }
+.type_btn:disabled { opacity: 0.35; cursor: not-allowed; }
