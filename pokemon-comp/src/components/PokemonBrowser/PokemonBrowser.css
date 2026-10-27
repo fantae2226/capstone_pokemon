@@ -1,0 +1,2 @@
+.pokemon_browser { width: min(60rem, 85vw); }
+.table_scroll { max-height: 60vh; overflow: auto; }

@@ -102,6 +102,9 @@ export default function TeamViewer(){
     const [allPokemonNames, setAllPokemonNames] = useState<string[]>([]);
     const [allItemNames, setAllItemNames] = useState<string[]>([]);
 
+    //new modal stuff
+    const [allPokemon, setAllPokemon] = useState<PokemonSummary[]>([]);
+
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState('');
 
@@ -140,19 +143,30 @@ export default function TeamViewer(){
     useEffect(() => {
         async function loadNameLists(){
             try {
-                const [pokemonRes, itemRes] = await Promise.all([
-                    fetch('https://pokeapi.co/api/v2/pokemon?limit=2000'),
-                    fetch('https://pokeapi.co/api/v2/item-attribute/holdable')
+                const [passiveRes, activeRes] = await Promise.all([
+                    fetch('https://pokeapi.co/api/v2/item-attribute/holdable-passive'),
+                    fetch('https://pokeapi.co/api/v2/item-attribute/holdable-active')
                 ]);
-                const pokemonData = await pokemonRes.json();
-                const itemData = await itemRes.json();
-                setAllPokemonNames(pokemonData.results.map((p: any) => p.name));
-                setAllItemNames(itemData.items.map((i: any) => i.name));
+                const passiveData = await passiveRes.json();
+                const activeData = await activeRes.json();
+                
+                const itemNames = [...passiveData.items, ...activeData.items].map((i:any) => i.name);
+                setAllItemNames(Array.from(new Set(itemNames)));
             } catch (error) {
                 console.error('Could not load PokeAPI name lists', error)
             }
         }
         loadNameLists();
+    }, []);
+
+    //grab all pokemon data from graphQL query
+    useEffect(() => {
+        fetchAllPokemon()
+            .then(list => {
+                console.log('loaded', list.length, list[0]);
+                setAllPokemon(list);
+            })
+            .catch(error => console.error('Could not load pokemon table data', error));
     }, []);
 
     function openEditor(slot: number, pokemon: TeamPokemon){
@@ -263,12 +277,13 @@ export default function TeamViewer(){
                         ))}
                     </div>
                     {pickingSlot !== null && (
-                        <SearchPicker
-                            options={allPokemonNames}
-                            placeholder="Search for a pokemon..."
-                            onPick={handlePickPokemon}
-                            onCancel={() => setPickingSlot(null)}
-                        />
+                        <Modal onClose={() => setPickingSlot(null)}>
+                            <PokemonBrowser
+                                pokemon={allPokemon}
+                                onPick={handlePickPokemon}
+                                onCancel={() => setPickingSlot(null)}
+                            />
+                        </Modal>
                     )}
                     {/* Pokemon Editor Data */}
 
