@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import pokeball from '../../assets/Pokeball.png';
 import type { TeamPokemon } from "@/types/pokemon";
 import PokemonEditor from "@/components/PokemonEditor/PokemonEditor";
-import SearchPicker from "@/components/SearchPicker/SearchPicker";
+// import SearchPicker from "@/components/SearchPicker/SearchPicker";
 import Modal from "@/components/Modal/Modal";
 import PokemonBrowser from "@/components/PokemonBrowser/PokemonBrowser";
 import type { PokemonSummary } from "@/types/pokemon";
@@ -98,7 +98,7 @@ export default function TeamViewer(){
     const [draft, setDraft] = useState<TeamPokemon | null>(null);
 
     const [pickingSlot, setPickingSlot] = useState<number|null>(null);
-    const [allPokemonNames, setAllPokemonNames] = useState<string[]>([]);
+    // const [allPokemonNames, setAllPokemonNames] = useState<string[]>([]);
     const [allItemNames, setAllItemNames] = useState<string[]>([]);
 
     //new modal stuff

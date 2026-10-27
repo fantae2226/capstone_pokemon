@@ -5,7 +5,7 @@ import supabase from '@/lib/supabase';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
-import PokeTeamContainer from '../../components/EditTeams/PokeTeamContainer';
+// import PokeTeamContainer from '../../components/EditTeams/PokeTeamContainer';
 
 import User from '../../assets/User.png';
 import Edit from '../../assets/Edit.png';
@@ -22,7 +22,7 @@ export default function UserSettings(){
     const userEmail = user?.email;
 
     const [isEditing, setIsEditing] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [, setLoading] = useState(true);
     
     const [form, setForm] = useState({username: "", email: ""});
     const [savedForm, setSavedForm] = useState({username: "", email: ""});

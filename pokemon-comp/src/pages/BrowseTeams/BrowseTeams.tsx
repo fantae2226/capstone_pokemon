@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import supabase from "@/lib/supabase"
 import PokeTeamContainer from "@/components/EditTeams/PokeTeamContainer"
-import type { PokemonImage, PokemonTeam } from "@/types/pokemon"
+import type { PokemonTeam } from "@/types/pokemon"
 
 
 
@@ -49,21 +49,21 @@ export default function BrowseTeams(){
         loadTeams();
     }, []);
 
-    async function fetchPokemonImg(idOrName:number | string):Promise<PokemonImage>{
+    // async function fetchPokemonImg(idOrName:number | string):Promise<PokemonImage>{
         
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`);
-        if(!res.ok){
-            throw new Error(`PokeAPI request failed: ${res.status}`);
-        }
+    //     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`);
+    //     if(!res.ok){
+    //         throw new Error(`PokeAPI request failed: ${res.status}`);
+    //     }
 
-        const data = await res.json();
-        return {
-            id: data.id,
-            name: data.name,
-            spriteUrl: data.sprites.other.home.front_default
-        }
+    //     const data = await res.json();
+    //     return {
+    //         id: data.id,
+    //         name: data.name,
+    //         spriteUrl: data.sprites.other.home.front_default
+    //     }
 
-    }
+    // }
 
     //function to add team 
     async function addTeam(){
