@@ -13,6 +13,8 @@ import Edit from '../../assets/Edit.png';
 import './UserSettings.css'
 import { validateEmail, validatePassword } from '@/lib/validation';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export default function UserSettings(){
     const navigate = useNavigate();
     const { user, session } = useAuth();
@@ -96,7 +98,7 @@ export default function UserSettings(){
             // const {data: { session }} = await supabase.auth.getSession();
 
             const { data } = await axios.patch(
-                'http://localhost:8000/user/username',
+                `${API}/user/username`,
                 { username: form.username },
                 { headers: { Authorization: `Bearer ${session?.access_token}`}}
             );
@@ -141,7 +143,7 @@ export default function UserSettings(){
         }
         
         try {
-            await axios.patch('http://localhost:8000/user/credentials',
+            await axios.patch(`${API}/user/credentials`,
                 {
                     currentPassword: secForm.currentPassword,
                     ...(emailChanging && { newEmail }),
@@ -293,9 +295,9 @@ export default function UserSettings(){
                             <div className="poke_team_container">A</div>
                             <div className="poke_team_container">B</div>
                             <div className="poke_team_container">C</div>
-                            <PokeTeamContainer 
+                            {/* <PokeTeamContainer 
                                 title='Trick Room'
-                                last_modified={new Date("2026-09-16")} />
+                                last_modified={new Date("2026-09-16")} /> */}
                         </div>
                     }
                     

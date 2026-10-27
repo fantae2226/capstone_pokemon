@@ -13,8 +13,7 @@ import supabase from "@/lib/supabase";
 import axios from "axios";
 
 const TEAM_SIZE = 6;
-const API = 'http://localhost:8000';
-
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 //function to read data from PokeAPI and shap it into a TeamPokemon
 async function fetchPokemon(idOrName:number | string): Promise<TeamPokemon> {

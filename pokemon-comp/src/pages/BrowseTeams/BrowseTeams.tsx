@@ -8,7 +8,8 @@ import type { PokemonImage, PokemonTeam } from "@/types/pokemon"
 
 
 
-const API = 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 //page that holds all of a users teams
 export default function BrowseTeams(){
     // const [teams, setTeams] = useState<PokemonTeam[]>([

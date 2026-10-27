@@ -7,12 +7,12 @@ import { validateEmail, validatePassword} from './src/lib/validation.ts'
 import { error } from 'console';
 
 
-const PORT = 8000;
+const PORT = process.env.PORT ?? 8000;
 const app = express();
 
 
 
-app.use(cors({ origin: 'http://localhost:5173' })) 
+app.use(cors({ origin: ['http://localhost:5173', process.env.FRONTEND_URL ?? ''] })) 
 app.use(express.json())  
 
 //test methid

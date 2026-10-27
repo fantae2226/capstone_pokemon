@@ -9,6 +9,7 @@ import { validateEmail, validatePassword } from '@/lib/validation';
 
 import './LoginSignup.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function LoginSignup() {
     const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -57,7 +58,7 @@ export default function LoginSignup() {
 
 
     async function handleSignup() {
-        const res = await fetch('http://localhost:8000/signup', {
+        const res = await fetch(`${API}/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(signupData)
