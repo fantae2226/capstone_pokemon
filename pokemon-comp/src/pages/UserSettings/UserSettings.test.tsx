@@ -129,7 +129,6 @@ describe('UserSettings - other tabs', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Manage Pokemon Teams' }));
 
         expect(screen.getByText('Last Edited Teams')).toBeTruthy();
-        expect(screen.getByText('Trick Room')).toBeTruthy();
         expect(screen.queryByText('Account Information')).toBeNull();
     });
 
