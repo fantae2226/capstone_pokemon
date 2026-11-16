@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { PokemonSummary } from "@/types/pokemon";
+import Modal from "@/components/Modal/Modal";
 import './PokemonBrowser.css';
 
 interface PokemonBrowserProps {
@@ -26,13 +27,17 @@ interface Filters {
     types: string[];
 }
 
-export default function PokemonBrowser( { pokemon, fetchMoveLearners, onPick, onCancel } : PokemonBrowserProps){
+type FilterSection = 'ability' | 'moves' | 'types';
+
+export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners, onPick, onCancel } : PokemonBrowserProps){
     const ALL_TYPES = [
         'normal', 'fire', 'water', 'electric', 'grass', 'ice',
         'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
         'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
     ];
     const MAX_TYPES = 2;
+    const MAX_MOVES = 4;
+    const MAX_SUGGESTIONS = 10;
 
 
     const [query, setQuery] = useState('');
@@ -45,6 +50,12 @@ export default function PokemonBrowser( { pokemon, fetchMoveLearners, onPick, on
     const [moves, setMoves] = useState<string[]>([]);
     const [moveLearners, setMoveLearners] = useState<Set<string> | null>(null);
     const [loadingMoves, setLoadingMoves] = useState(false);
+
+    //filter modal stuff
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const [draft, setDraft] = useState<Filters>({ ability: null, moves: [], types: []});
+    const [section, setSection] = useState<FilterSection | null>(null);
+    const [filterQuery, setFilterQuery] = useState('');
 
     const cleaned = query.trim().toLowerCase().replace(/\s+/g, '-');
     const rows = pokemon
@@ -61,6 +72,20 @@ export default function PokemonBrowser( { pokemon, fetchMoveLearners, onPick, on
                 : (a.baseStats[sort.key] - b.baseStats[sort.key]) * direction
         );
     }
+
+    //get every ability any pokemon has with no dupes
+    const abilityNames = Array.from(new Set(pokemon.flatMap(p => p.abilities))).sort();
+    
+    //what user typed into the filter modal, it is cleaned like pokemon search is
+    const filterSearch = filterQuery.trim().toLowerCase().replace(/\s+/g, '-');
+
+    const abilitySuggestions = filterSearch === '' ? [] : abilityNames
+        .filter(a => a.includes(filterSearch))
+        .slice(0, MAX_SUGGESTIONS);
+    
+    const moveSuggestions = filterSearch === '' ? [] : moveNames
+        .filter(m => m.includes(filterSearch) && !draft.moves.includes(m))
+        .slice(0, MAX_SUGGESTIONS);
 
     async function applyFilters(next: Filters){
         setAbility(next.ability);
@@ -124,14 +149,46 @@ export default function PokemonBrowser( { pokemon, fetchMoveLearners, onPick, on
         setMoveLearners(null);
     }
 
+    function openFilterModal(){
+        setDraft({ ability, moves, types });
+        setSection(null);
+        setFilterQuery('');
+        setShowFilterModal(true);
+    }
+
+    function chooseSection(next: FilterSection){
+        setSection(next);
+        setFilterQuery('');
+    }
+
+    function pickAbility(name: string){
+        setDraft(prev => ({...prev, ability: name }));
+        setFilterQuery('');
+    }
+
+    function addMove(name: string){
+        setDraft(prev => 
+            prev.moves.length >= MAX_MOVES || prev.moves.includes(name)
+                ? prev
+                : { ...prev, moves: [...prev.moves, name] }
+        );
+        setFilterQuery('');
+    }
+
+    function removeDraftMove(name: string){
+        setDraft(prev => ({ ...prev, moves: prev.moves.filter(m => m !==  name)}));
+    }
+
+    function applyDraft(){
+        applyFilters(draft);
+        setShowFilterModal(false);
+    }
+
     return (
         <div className="pokemon_browser">
             <button onClick={onCancel}>Cancel</button>
             
-            {/* Testing move and ability filtering */}
-            <button onClick={() => applyFilters({ability: 'intimidate', moves: ['fake-out', 'parting-shot'], types:[]})}>
-                Test Filters
-            </button> 
+            <button onClick={openFilterModal}>Add Filter</button>
             <input 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -180,6 +237,84 @@ export default function PokemonBrowser( { pokemon, fetchMoveLearners, onPick, on
                         </button>
                     ))}
                 </div>
+            )}
+
+            {showFilterModal && (
+                <Modal onClose={() => setShowFilterModal(false)}>
+                    <div className="filter_modal">
+                        <div className="filter_sections">
+                            <button
+                                className={section === 'ability' ? 'type_btn_active' : ''}
+                                onClick={() => chooseSection('ability')}
+                            >
+                                Ability
+                            </button>
+                            <button
+                                className={section === 'moves' ? 'type_btn_active' : ''}
+                                onClick={() => chooseSection('moves')}
+                            >
+                                Moves
+                            </button>
+                        </div>
+
+                        {section === 'ability' && (
+                            <div className="filter_section">
+                                {draft.ability && (
+                                    <span className="chip">
+                                        {draft.ability.replace(/-/g, ' ')}
+                                        <button onClick={() => setDraft(prev => ({ ...prev, ability: null }))}>X</button>
+                                    </span>
+                                )}
+                                <input 
+                                    value={filterQuery} 
+                                    onChange={e => setFilterQuery(e.target.value)}
+                                    placeholder="Search for an ability..."
+                                    autoFocus
+                                />
+                                <ul className="suggestions">
+                                    {abilitySuggestions.map(a => (
+                                        <li key={a}>
+                                            <button onClick={() => pickAbility(a)}>{a.replace(/-/g, ' ')}</button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {section === 'moves' && (
+                            <div className="filter_section">
+                                <div className="filter_chips">
+                                    {draft.moves.map(m => (
+                                        <span key={m} className="chip">
+                                            {m.replace(/-/g, ' ')}
+                                            <button onClick={() => removeDraftMove(m)}>X</button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <input 
+                                    value={filterQuery}
+                                    onChange={e => setFilterQuery(e.target.value)}
+                                    placeholder={draft.moves.length >= MAX_MOVES ? 'Max 4 moves selected' : 'Search for a move...'}
+                                    disabled={draft.moves.length >= MAX_MOVES}
+                                    autoFocus
+                                />
+                                <ul className="suggestions">
+                                    {moveSuggestions.map(m => (
+                                        <li key={m}>
+                                            <button onClick={() => addMove(m)}>{m.replace(/-/g, ' ')}</button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <div className="filter_actions">
+                            <button onClick={() => setShowFilterModal(false)}>Cancel</button>
+                            <button onClick={applyDraft}>Apply</button>
+                        </div>
+
+                    </div>
+                </Modal>
             )}
             <div className="table_scroll">
                 <table>

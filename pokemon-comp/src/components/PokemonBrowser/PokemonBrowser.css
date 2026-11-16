@@ -11,3 +11,10 @@
 .type_btn { text-transform: capitalize; }
 .type_btn_active { outline: 2px solid #000000; }
 .type_btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.filter_modal { display: flex; flex-direction: column; gap: 0.75rem; width: min(28rem, 80vw); }
+.filter_sections { display: flex; gap: 0.5rem; }
+.filter_section { display: flex; flex-direction: column; gap: 0.5rem; }
+.suggestions { list-style: none; margin: 0; padding: 0; max-height: 15rem; overflow-y: auto; text-transform: capitalize; }
+.suggestions button { width: 100%; text-align: left; }
+.filter_actions { display: flex; justify-content: flex-end; gap: 0.5rem; }

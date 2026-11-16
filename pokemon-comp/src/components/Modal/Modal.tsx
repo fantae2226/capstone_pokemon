@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef ,type ReactNode } from "react";
 import './Modal.css';
 
 type ModalProps = {
@@ -8,9 +8,14 @@ type ModalProps = {
 };
 
 export default function Modal({ onClose, children }: ModalProps){
+    const overlayRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if(e.key === "Escape") onClose();
+            //only close top most modal
+            const overlays = document.querySelectorAll('.modal-overlay');
+            const isTopModal = overlays[overlays.length - 1] === overlayRef.current;
+            if(e.key === "Escape" && isTopModal) onClose();
         };
 
         window.addEventListener("keydown", onKey);
@@ -18,7 +23,7 @@ export default function Modal({ onClose, children }: ModalProps){
     }, [onClose]);
 
     return createPortal(
-        <div className="modal-overlay" onClick={onClose}>
+        <div ref={overlayRef} className="modal-overlay" onClick={onClose}>
             <div className="modal-box" onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
