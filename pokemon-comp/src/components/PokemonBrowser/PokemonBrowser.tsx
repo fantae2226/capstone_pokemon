@@ -4,6 +4,8 @@ import './PokemonBrowser.css';
 
 interface PokemonBrowserProps {
     pokemon: PokemonSummary[];
+    moveNames: string[];
+    fetchMoveLearners: (moves: string[]) => Promise<Set<string>>;
     onPick: (name: string) => void;
     onCancel: () => void;
 }
@@ -17,7 +19,14 @@ interface Sort {
     direction: 'asc' | 'desc';
 }
 
-export default function PokemonBrowser( { pokemon, onPick, onCancel } : PokemonBrowserProps){
+//all filters that will be set when hitting Apply button
+interface Filters {
+    ability: string | null;
+    moves: string[];
+    types: string[];
+}
+
+export default function PokemonBrowser( { pokemon, fetchMoveLearners, onPick, onCancel } : PokemonBrowserProps){
     const ALL_TYPES = [
         'normal', 'fire', 'water', 'electric', 'grass', 'ice',
         'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
@@ -32,10 +41,17 @@ export default function PokemonBrowser( { pokemon, onPick, onCancel } : PokemonB
     const [types, setTypes] = useState<string[]>([]);
     const [showTypePicker, setShowTypePicker] = useState(false);
 
+    const [ability, setAbility] = useState<string | null>(null);
+    const [moves, setMoves] = useState<string[]>([]);
+    const [moveLearners, setMoveLearners] = useState<Set<string> | null>(null);
+    const [loadingMoves, setLoadingMoves] = useState(false);
+
     const cleaned = query.trim().toLowerCase().replace(/\s+/g, '-');
     const rows = pokemon
         .filter(p => p.name.includes(cleaned))
-        .filter(p => types.every(t => p.types.includes(t)));
+        .filter(p => types.every(t => p.types.includes(t)))
+        .filter(p => ability === null || p.abilities.includes(ability))
+        .filter(p => moveLearners === null || moveLearners.has(p.id));
 
     if(sort){
         const direction = sort.direction === 'asc' ? 1 : -1;
@@ -44,6 +60,32 @@ export default function PokemonBrowser( { pokemon, onPick, onCancel } : PokemonB
                 ? a.name.localeCompare(b.name) * direction
                 : (a.baseStats[sort.key] - b.baseStats[sort.key]) * direction
         );
+    }
+
+    async function applyFilters(next: Filters){
+        setAbility(next.ability);
+        setTypes(next.types);
+
+        //query graphQL if moves were changed
+        const movesChanged = next.moves.length !== moves.length 
+            || next.moves.some(m => !moves.includes(m));
+        if (!movesChanged) return;
+
+        setMoves(next.moves);
+        if(next.moves.length === 0){
+            setMoveLearners(null)
+            return;
+        }
+
+        setLoadingMoves(true);
+        try{
+            setMoveLearners(await fetchMoveLearners(next.moves));
+        } catch(error){
+            console.error('Could not load move learners', error);
+            setMoves(moves); //puts old moves back in case of error
+        } finally {
+            setLoadingMoves(false);
+        }
     }
 
     const arrow = (key: SortKey) => 
@@ -65,16 +107,31 @@ export default function PokemonBrowser( { pokemon, onPick, onCancel } : PokemonB
         });
     }
 
+    
+    function removeAbility(){
+        applyFilters({ability: null, moves, types});
+    }
+    
+    function removeMove(move: string){
+        applyFilters({ability, moves: moves.filter(m=> m !== move), types});
+    }
+    
     function resetFilters(){
         setSort(null);
         setTypes([]);
+        setAbility(null);
+        setMoves([]);
+        setMoveLearners(null);
     }
-
-    
 
     return (
         <div className="pokemon_browser">
             <button onClick={onCancel}>Cancel</button>
+            
+            {/* Testing move and ability filtering */}
+            <button onClick={() => applyFilters({ability: 'intimidate', moves: ['fake-out', 'parting-shot'], types:[]})}>
+                Test Filters
+            </button> 
             <input 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -94,7 +151,20 @@ export default function PokemonBrowser( { pokemon, onPick, onCancel } : PokemonB
                         <button onClick={() => toggleType(type)}>X</button>
                     </span>
                 ))}
-                {(sort || types.length > 0) && <button onClick={resetFilters}>Reset Filters</button>}
+                {ability && (
+                    <span className="chip">
+                        {ability.replace(/-/g, ' ')}
+                        <button onClick={removeAbility}>X</button>
+                    </span>
+                )}
+                {moves.map(move => (
+                    <span key={`move-${move}`} className="chip">
+                        {move.replace(/-/g, ' ')}
+                        <button onClick={() => removeMove(move)}>X</button>
+                    </span>
+                ))}
+                {loadingMoves && <span>Loading moves...</span>}
+                {(sort || types.length > 0 || ability || moves.length > 0) && <button onClick={resetFilters}>Reset Filters</button>}
             </div>
 
             {showTypePicker && (

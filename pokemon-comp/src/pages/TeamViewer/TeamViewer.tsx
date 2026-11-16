@@ -154,6 +154,7 @@ export default function TeamViewer(){
 
     //new modal stuff
     const [allPokemon, setAllPokemon] = useState<PokemonSummary[]>([]);
+    const [allMoveNames, setAllMoveNames] = useState<string[]>([]);
 
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState('');
@@ -213,10 +214,25 @@ export default function TeamViewer(){
     useEffect(() => {
         fetchAllPokemon()
             .then(list => {
-                console.log('loaded', list.length, list[0]);
+                console.log('loaded', list.length, list[0]);//test to see if the cache of pokemon was loaded
                 setAllPokemon(list);
             })
             .catch(error => console.error('Could not load pokemon table data', error));
+    }, []);
+
+    //grab every learnable move name once, so move search filters locally instead of making constant calls
+    useEffect(() => {
+        fetchAllMoveNames()
+            .then(names => {
+                console.log(names.length,
+                    names.includes('u-turn'),
+                    names.includes('max-flare'),
+                    names.includes('breakneck-blitz--physical')
+                ); //test to see filter is removing gimmick moves
+                fetchMoveLearners(['u-turn', 'knock-off']).then(ids => console.log('learners', ids.size, ids.has('6')));//test ti see if fetchMoveLearners works    
+                setAllMoveNames(names);
+            })
+            .catch(error => console.error('Could not load move names', error));
     }, []);
 
     function openEditor(slot: number, pokemon: TeamPokemon){
@@ -330,6 +346,8 @@ export default function TeamViewer(){
                         <Modal onClose={() => setPickingSlot(null)}>
                             <PokemonBrowser
                                 pokemon={allPokemon}
+                                moveNames={allMoveNames}
+                                fetchMoveLearners={fetchMoveLearners}
                                 onPick={handlePickPokemon}
                                 onCancel={() => setPickingSlot(null)}
                             />
