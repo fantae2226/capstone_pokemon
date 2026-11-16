@@ -32,4 +32,5 @@ export interface PokemonTeam {
 export interface PokemonSummary extends PokemonImage{
     types: string[];
     baseStats: TeamPokemon['baseStats'];
+    abilities: string[];
 }

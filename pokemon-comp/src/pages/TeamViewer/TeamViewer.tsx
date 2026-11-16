@@ -46,6 +46,9 @@ const SPRITE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/spr
 
 let pokemonTableCache: Promise<PokemonSummary[]> | null = null;
 
+//excluded forms - costume and event forms that aren't battle only, causing the query to leave them in unless i manually remove them
+const EXCLUDED_FORMS = ['-totem', 'pikachu-', '-starter'];
+
 //finds one stat.s value in the rawGraphQL stat list, 0 if missing
 function findStat(rawStats: any[], apiName: string): number {
     return rawStats.find(s => s.stat.name === apiName)?.base_stat ?? 0;
@@ -65,7 +68,8 @@ function toSummary(raw: any): PokemonSummary {
             spatk: findStat(raw.pokemonstats, 'special-attack'),
             spdef: findStat(raw.pokemonstats, 'special-defense'),
             spe: findStat(raw.pokemonstats, 'speed')
-        }
+        },
+        abilities: raw.pokemonabilities.map( (a: any) => a.ability.name)
     };
 }
 
@@ -73,20 +77,67 @@ function fetchAllPokemon(): Promise<PokemonSummary[]> {
     if(!pokemonTableCache) {
         pokemonTableCache = (async () => {
             const res = await axios.post(GRAPHQL_URL, { query: `{
-                    pokemon(order_by: {id: asc}) {
+                    pokemon(
+                        order_by: {id: asc},
+                        where: { pokemonforms: { is_battle_only: { _eq: false } } }
+                    ) {
                         id
                         name
                         pokemontypes(order_by: {slot: asc}) { type { name } }
                         pokemonstats {base_stat stat { name } }
+                        pokemonabilities { ability { name } }
                     }
                 }`});
             const json = res.data;
             if(json.errors) throw new Error(json.errors[0].message);
-            return json.data.pokemon.map(toSummary);
+            return json.data.pokemon
+                .filter((p: any) => !EXCLUDED_FORMS.some(pattern => p.name.includes(pattern)))
+                .map(toSummary);
 
         })().catch(error => { pokemonTableCache = null; throw error; });
     }
     return pokemonTableCache;
+}
+
+let moveNamesCache: Promise<string[]> | null = null;
+
+//cache every move at least one pokemon learns (excludes gimmick type moves like Z-Moves, Max Moves, etc...)
+function fetchAllMoveNames(): Promise<string[]> {
+    if(!moveNamesCache){
+        moveNamesCache = (async () => {
+            const res = await axios.post(GRAPHQL_URL, {query : `{
+                    move(
+                        where: { pokemonmoves: { pokemon_id: { _is_null: false }}},
+                        order_by: { name: asc }
+                    ) {
+                        name    
+                    }
+                }`});
+            const json = res.data;
+            if(json.errors) throw new Error(json.errors[0].message);
+            return json.data.move.map((m: any) => m.name);
+        })().catch(error => {moveNamesCache = null; throw error;});
+    }
+    return moveNamesCache;
+}
+
+//gets ids of every pokemon that learns all of the moves provided
+async function fetchMoveLearners(moves: string[]): Promise<Set<string>> {
+    const conditions = moves.map(move => ({
+        pokemonmoves: { move : { name: { _eq: move }}}
+    }));
+
+    const res = await axios.post(GRAPHQL_URL, {
+        query: `query ($conditions: [pokemon_bool_exp!]) {
+                pokemon(where: { _and: $conditions }) {
+                    id
+                }
+            }`,
+        variables: { conditions }
+    });
+    const json = res.data;
+    if(json.errors) throw new Error(json.errors[0].message);
+    return new Set(json.data.pokemon.map((p: any) => String(p.id)));
 }
 
 export default function TeamViewer(){
