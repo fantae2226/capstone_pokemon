@@ -44,7 +44,7 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
     const [sort, setSort] = useState<Sort | null>(null);
 
     const [types, setTypes] = useState<string[]>([]);
-    const [showTypePicker, setShowTypePicker] = useState(false);
+    // const [showTypePicker, setShowTypePicker] = useState(false);
 
     const [ability, setAbility] = useState<string | null>(null);
     const [moves, setMoves] = useState<string[]>([]);
@@ -179,6 +179,16 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
         setDraft(prev => ({ ...prev, moves: prev.moves.filter(m => m !==  name)}));
     }
 
+    function toggleDraftType(t: string){
+        setDraft(prev => {
+            if(prev.types.includes(t)){
+                return { ...prev, types: prev.types.filter(x => x !== t)};
+            } 
+            if(prev.types.length >= MAX_TYPES) return prev;
+            return { ...prev, types: [...prev.types, t]}
+        })
+    }
+
     function applyDraft(){
         applyFilters(draft);
         setShowFilterModal(false);
@@ -224,20 +234,6 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
                 {(sort || types.length > 0 || ability || moves.length > 0) && <button onClick={resetFilters}>Reset Filters</button>}
             </div>
 
-            {showTypePicker && (
-                <div className="type_picker">
-                    {ALL_TYPES.map(t => (
-                        <button
-                            key={t}
-                            className={types.includes(t) ? 'type_btn type_btn_active' : 'type_btn'}
-                            disabled={!types.includes(t) && types.length >= MAX_TYPES}
-                            onClick={() => toggleType(t)}
-                        >
-                            {t}
-                        </button>
-                    ))}
-                </div>
-            )}
 
             {showFilterModal && (
                 <Modal onClose={() => setShowFilterModal(false)}>
@@ -255,6 +251,13 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
                             >
                                 Moves
                             </button>
+                            <button
+                                className={section === 'types' ? 'type_btn_active' : ''}
+                                onClick={() => chooseSection('types')}
+                            >
+                                Types
+                            </button>
+
                         </div>
 
                         {section === 'ability' && (
@@ -308,6 +311,21 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
                             </div>
                         )}
 
+                        {section === 'types' && (
+                            <div className="type_picker">
+                                {ALL_TYPES.map(t => (
+                                    <button
+                                        key={t}
+                                        className={draft.types.includes(t) ? 'type_btn type_btn_active' : 'type_btn'}
+                                        disabled={!draft.types.includes(t) && draft.types.length >= MAX_TYPES}
+                                        onClick={() => toggleDraftType(t)}
+                                    >
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
                         <div className="filter_actions">
                             <button onClick={() => setShowFilterModal(false)}>Cancel</button>
                             <button onClick={applyDraft}>Apply</button>
@@ -322,7 +340,7 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
                         <tr>
                             <th></th>
                             <th onClick={() => clickSort('name')}>Name {arrow('name')}</th>
-                            <th onClick={() => setShowTypePicker(s => !s)}>Types</th>
+                            <th>Types</th>
                             {STAT_KEYS.map(k => (
                                 <th key={k} onClick={() => clickSort(k)}>
                                     {k.toUpperCase()}
