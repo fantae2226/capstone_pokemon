@@ -203,7 +203,7 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
         <div className="pokemon_browser">
             <button onClick={onCancel}>Cancel</button>
             
-            <button onClick={openFilterModal}>Add Filter</button>
+            <button onClick={openFilterModal} disabled={loadingMoves}>Add Filter</button>
             <input 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -265,14 +265,29 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
 
                         </div>
 
-                        {section === 'ability' && (
-                            <div className="filter_section">
-                                {draft.ability && (
+                        <div className="filter_chips">
+                            {draft.ability && (
                                     <span className="chip">
                                         {draft.ability.replace(/-/g, ' ')}
                                         <button onClick={() => setDraft(prev => ({ ...prev, ability: null }))}>X</button>
                                     </span>
-                                )}
+                            )}
+                            {draft.moves.map(m => (
+                                        <span key={m} className="chip">
+                                            {m.replace(/-/g, ' ')}
+                                            <button onClick={() => removeDraftMove(m)}>X</button>
+                                        </span>
+                            ))}
+                            {draft.types.map(t => (
+                                <span key={`type-${t}`} className="chip">
+                                    {t}
+                                    <button onClick={() => toggleDraftType(t)}>X</button>
+                                </span>
+                            ))}
+                        </div>
+
+                        {section === 'ability' && (
+                            <div className="filter_section">
                                 <input 
                                     value={filterQuery} 
                                     onChange={e => setFilterQuery(e.target.value)}
@@ -291,14 +306,6 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
 
                         {section === 'moves' && (
                             <div className="filter_section">
-                                <div className="filter_chips">
-                                    {draft.moves.map(m => (
-                                        <span key={m} className="chip">
-                                            {m.replace(/-/g, ' ')}
-                                            <button onClick={() => removeDraftMove(m)}>X</button>
-                                        </span>
-                                    ))}
-                                </div>
                                 <input 
                                     value={filterQuery}
                                     onChange={e => setFilterQuery(e.target.value)}

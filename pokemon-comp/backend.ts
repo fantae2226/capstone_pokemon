@@ -288,6 +288,16 @@ app.get('/teams/:id', async(req, res) => {
     res.json(data);
 })
 
+
+//checks an evs object: each stat 0-252, total 510 max. missing evs count as all 0
+const EV_KEYS = ['hp', 'atk', 'def', 'spatk', 'spdef', 'spe'];
+function validEvs(evs: any){
+    if(evs == null) return true;
+    const values = EV_KEYS.map(key => evs[key] ?? 0);
+    return values.every(v => Number.isInteger(v) && v >= 0 && v <= 252)
+        && values.reduce((sum, v) => sum + v, 0) <= 510;
+}
+
 //saves a team's name and all its pokemon in one go
 app.put('/teams/:id', async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -306,10 +316,14 @@ app.put('/teams/:id', async (req, res) => {
     }
 
     const validPokemon = Array.isArray(pokemon)
-        && pokemon.length <= 6 //are 6 or less pokemon being sent
-        && pokemon.every((p: any) =>
-            Number.isInteger(p.slot) && p.slot >= 0 && p.slot <= 5 && Number.isInteger(p.species_id)) //are the slots between 0-5, and is slot and species id an int
-        && new Set(pokemon.map((p: any) => p.slot)).size === pokemon.length; //did any two or more pokemon claim the same slot
+    && pokemon.length <= 6 //are 6 or less pokemon being sent
+    && pokemon.every((p: any) =>
+        Number.isInteger(p.slot) && p.slot >= 0 && p.slot <= 5 && Number.isInteger(p.species_id) //are the slots between 0-5, and is slot and species id an int
+        && (p.level == null || (Number.isInteger(p.level) && p.level >= 1 && p.level <= 100))
+        && (p.gender == null || p.gender === 'male' || p.gender === 'female')
+        && validEvs(p.evs))
+    && new Set(pokemon.map((p: any) => p.slot)).size === pokemon.length; //did any two or more pokemon claim the same slot
+
     if(!validPokemon){
         return res.status(400).json({error:'Invalid Pokemon Data'});
     }
@@ -325,7 +339,6 @@ app.put('/teams/:id', async (req, res) => {
         return res.status(404).json({error:'Team not found'});
     }
 
-    //nature, ability, gender, shiny, and evs to be added later
     const rows = pokemon.map((p: any) => ({
         team_id: req.params.id,
         slot: p.slot,
@@ -334,7 +347,18 @@ app.put('/teams/:id', async (req, res) => {
         move1: p.moves?.[0] ?? null,
         move2: p.moves?.[1] ?? null,
         move3: p.moves?.[2] ?? null,
-        move4: p.moves?.[3] ?? null
+        move4: p.moves?.[3] ?? null,
+        nature: p.nature ?? 'serious',
+        ability: p.ability ?? null,
+        gender: p.gender ?? null,
+        shiny: p.shiny === true,
+        level: p.level ?? 50,
+        ev_hp: p.evs?.hp ?? 0,
+        ev_atk: p.evs?.atk ?? 0,
+        ev_def: p.evs?.def ?? 0,
+        ev_spa: p.evs?.spatk ?? 0,
+        ev_spd: p.evs?.spdef ?? 0,
+        ev_spe: p.evs?.spe ?? 0
     }));
 
     //insert new slots / update existing ones (unique on team_id + slot)
