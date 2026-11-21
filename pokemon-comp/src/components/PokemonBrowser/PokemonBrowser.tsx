@@ -88,29 +88,34 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
         .slice(0, MAX_SUGGESTIONS);
 
     async function applyFilters(next: Filters){
-        setAbility(next.ability);
-        setTypes(next.types);
-
+        
         //query graphQL if moves were changed
         const movesChanged = next.moves.length !== moves.length 
             || next.moves.some(m => !moves.includes(m));
-        if (!movesChanged) return;
+        
+        let learners = moveLearners;
 
+        if(movesChanged){
+            if(next.moves.length === 0){
+                learners = null;
+            } else{
+                setLoadingMoves(true);
+
+                try {
+                    learners = await fetchMoveLearners(next.moves);
+                } catch (error) {
+                    console.error('Could not load move learners', error);
+                    return;
+                } finally {
+                    setLoadingMoves(false);
+                }
+            }
+        }
+
+        setAbility(next.ability);
+        setTypes(next.types);
         setMoves(next.moves);
-        if(next.moves.length === 0){
-            setMoveLearners(null)
-            return;
-        }
-
-        setLoadingMoves(true);
-        try{
-            setMoveLearners(await fetchMoveLearners(next.moves));
-        } catch(error){
-            console.error('Could not load move learners', error);
-            setMoves(moves); //puts old moves back in case of error
-        } finally {
-            setLoadingMoves(false);
-        }
+        setMoveLearners(learners);
     }
 
     const arrow = (key: SortKey) => 
