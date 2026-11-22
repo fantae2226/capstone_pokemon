@@ -12,3 +12,8 @@
 .pokemon_editor_tabs { min-width: 16rem; }
 .pokemon_editor_details { display: flex; flex-direction: column; gap: 0.75rem; }
 .detail_row { display: grid; grid-template-columns: 4rem 1fr; align-items: center; gap: 0.5rem; text-transform: capitalize; }
+.ev_row { display: grid; grid-template-columns: 2.5rem 1.75rem 1fr 1.75rem 3.5rem; align-items: center; gap: 0.4rem; }
+.ev_row button { border: 1px solid #ccc; border-radius: 0.25rem; }
+.ev_row button:disabled { opacity: 0.35; cursor: not-allowed; }
+.ev_number { width: 100%; text-align: right; }
+.ev_remaining { align-self: flex-end; font-size: 0.875rem; opacity: 0.8; }

@@ -47,6 +47,22 @@ const NATURES: { name: string; up: StatKey | null; down: StatKey | null }[] = [
 
 const NATURE_GROUPS: (StatKey | null)[] = ['atk', 'def', 'spatk', 'spdef', 'spe', null];
 
+const MAX_EV_STAT = 252;
+const MAX_EV_TOTAL = 510;
+
+//add up all 6 evs
+function totalEvs(evs: Stats){
+    return STAT_KEYS.reduce((sum, key) => sum + evs[key], 0);
+}
+
+//caps a new ev value to the stat stays between 0 and 252 and the total never passes 510
+//ex: 500 evs used, 0 in atk, user types 252 into atk -> becomes 10
+function clampEv(evs: Stats, stat: StatKey, value: number){
+    const othersTotal = totalEvs(evs) - evs[stat]; //evs currently used by other 5 stats
+    const maxForStat = Math.min(MAX_EV_STAT, MAX_EV_TOTAL - othersTotal);
+    return Math.min(maxForStat, Math.max(0, Math.round(value)));
+}
+
 //use pokemon stat formula : we assume 31 IVs
 function calcStat(stat: StatKey, base: number, ev: number, level: number, natureName: string){
     if(stat === 'hp' && base === 1) return 1; //for shedinja who always has 1 hp
@@ -117,6 +133,41 @@ function StatRow({ label, base, real, cap, boost }: StatRowProps){
     );
 }
 
+interface EvRowProps {
+    label: string;
+    value: number;
+    canAdd: boolean; //false when this stat is at 252 or when no evs are left
+    onSet: (value: number) => void;
+}
+
+//one row of ev controls: label | - | slider | + | number box
+function EvRow({ label, value, canAdd, onSet }: EvRowProps){
+    return (
+        <div className="ev_row">
+            <span>{label}</span>
+            <button type="button" onClick={() => onSet(value - 1)} disabled={value === 0}>-</button>
+            <input 
+                type="range"  
+                min={0}
+                max={MAX_EV_STAT}
+                value={value}
+                onChange={e => onSet(Number(e.target.value))}
+            />
+            <button type="button" onClick={() => onSet(value + 1)} disabled={!canAdd}>+</button>
+            <input 
+                type="number"
+                className="ev_number"
+                min={0}
+                max={MAX_EV_STAT}
+                value={value}
+                onChange={e => {
+                    if(e.target.value !== '') onSet(Number(e.target.value));
+                }}
+            />
+        </div>
+    )
+}
+
 
 export default function PokemonEditor( { pokemon, onChange, itemOptions }: PokemonEditorProps){
     const [editingMove, setEditingMove] = useState<number | null>(null); //which move slot is being searched
@@ -137,6 +188,11 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
 
     const realStats = calcStats(pokemon);
     const nature = NATURES.find(n => n.name === pokemon.nature);
+    const remaining = MAX_EV_TOTAL - totalEvs(pokemon.evs);
+
+    function setEv(stat: StatKey, value: number){
+        onChange({ evs: { ...pokemon.evs, [stat]: clampEv(pokemon.evs, stat, value) } });
+    }
     return(
         <div className="pokemon_editor">
             <div className="pokemon_editor_left">
@@ -215,6 +271,18 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                                 ))}
                             </select>
                         </label>
+                        {STAT_KEYS.map(stat => (
+                            <EvRow 
+                                key={stat}
+                                label={STAT_LABELS[stat]}
+                                value={pokemon.evs[stat]}
+                                canAdd={pokemon.evs[stat] < MAX_EV_STAT && remaining > 0}
+                                onSet={value => setEv(stat, value)}
+                            />
+                        ))}
+                        <span className="ev_remaining">
+                            Remaining: {remaining} / {MAX_EV_TOTAL}
+                        </span>
                     </div>
                 </TabsContent>
 
