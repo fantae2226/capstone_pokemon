@@ -16,6 +16,11 @@ export interface Stats {
     spe: number;
 }
 
+export type StatKey = keyof Stats; //'hp' | 'atk' | 'def' | 'spatk' | 'spdef' | 'spe'
+
+//short display name for each stat
+export const STAT_LABELS: Record<StatKey, string> = { hp: 'HP', atk: 'Atk', def: 'Def', spatk: 'SpA', spdef: 'SpD', spe: 'Spe' };
+
 //team pokemon type
 export interface TeamPokemon extends PokemonImage{
     baseStats: Stats;

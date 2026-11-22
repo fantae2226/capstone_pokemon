@@ -1,7 +1,9 @@
-import type { TeamPokemon, Stats } from "@/types/pokemon";
+import type { TeamPokemon, Stats, StatKey } from "@/types/pokemon";
+import { STAT_LABELS } from "@/types/pokemon";
 import { useState } from "react";
 import SearchPicker from "../SearchPicker/SearchPicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../animate-ui/components/radix/tabs";
+import StatHexagon from "../StatHexagon/StatHexagon";
 import './PokemonEditor.css';
 
 interface PokemonEditorProps {
@@ -11,10 +13,9 @@ interface PokemonEditorProps {
 }
 
 
-type StatKey = keyof Stats;
 
 const STAT_KEYS: StatKey[] = ['hp', 'atk', 'def', 'spatk', 'spdef', 'spe'];
-const STAT_LABELS: Record<StatKey, string> = { hp: 'HP', atk: 'Atk', def: 'Def', spatk: 'SpA', spdef: 'SpD', spe: 'Spe' };
+
 
 //all natures listed and which stats its raises and lowers in dropdown
 const NATURES: { name: string; up: StatKey | null; down: StatKey | null }[] = [
@@ -89,6 +90,20 @@ function calcStats(p: TeamPokemon): Stats {
 //hp gets its own (bigger) cap automatically because calcStat uses the hp formula for it
 function statCap(stat: StatKey, level: number){
     return calcStat(stat, 200, 0, level, 'serious');
+}
+
+const NO_EVS: Stats = { hp: 0, atk: 0, def: 0, spatk: 0, spdef: 0, spe: 0 };
+
+//all 6 bar caps for a level, same caps stat bars use
+function statCaps(level: number): Stats {
+    return {
+        hp: statCap('hp', level),
+        atk: statCap('atk', level),
+        def: statCap('def', level),
+        spatk: statCap('spatk', level),
+        spdef: statCap('spdef', level),
+        spe: statCap('spe', level),
+    }
 }
 
 function statColor(value: number, cap: number){
@@ -189,6 +204,8 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
     const realStats = calcStats(pokemon);
     const nature = NATURES.find(n => n.name === pokemon.nature);
     const remaining = MAX_EV_TOTAL - totalEvs(pokemon.evs);
+    const caps = statCaps(pokemon.level);
+    const untrainedStats = calcStats({...pokemon, evs: NO_EVS, nature: 'serious'}); //same pokemon with no evs and neutral nature
 
     function setEv(stat: StatKey, value: number){
         onChange({ evs: { ...pokemon.evs, [stat]: clampEv(pokemon.evs, stat, value) } });
@@ -254,6 +271,13 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
 
                 <TabsContent value="stats">
                     <div className="pokemon_editor_details">
+                        <StatHexagon
+                            untrained={untrainedStats}
+                            real={realStats}
+                            caps={caps}
+                            up={nature?.up ?? null}
+                            down={nature?.down ?? null}
+                        />
                         <label className="detail_row">
                             Nature
                             <select 
