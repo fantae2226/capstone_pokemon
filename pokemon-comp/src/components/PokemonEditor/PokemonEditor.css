@@ -2,7 +2,11 @@
 .pokemon_editor_left { display: flex; flex-direction: column; align-items: center; }
 .pokemon_editor_stats { width: 100%; }
 .pokemon_editor_moves { display: flex; flex-direction: column; gap: 0.5rem; }
-.stat_row { display: grid; grid-template-columns: 3rem 1fr 3rem; align-items: center; gap: 0.5rem; }
+.stat_row { display: grid; grid-template-columns: 2.5rem 2.5rem 1fr 2.5rem; align-items: center; gap: 0.5rem; }
+.stat_base { text-align: right; opacity: 0.7; }
+.stat_value { text-align: right; }
+.stat_label_up { color: #3b82f6; font-weight: 600; }   /* nature raises this stat */
+.stat_label_down { color: #ef4444; font-weight: 600; } /* nature lowers this stat */
 .stat_bar { background: #ddd; height: 0.5rem; }
 .stat_bar_fill { background: #4caf50; height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
 .pokemon_editor_tabs { min-width: 16rem; }
