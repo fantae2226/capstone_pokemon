@@ -15,6 +15,15 @@ import axios from "axios";
 const TEAM_SIZE = 6;
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+function withSprite(p: TeamPokemon) : TeamPokemon{
+    const s = p.sprites;
+    const female = p.gender === 'female';
+    const url = p.shiny
+        ? (female && s.shinyFemale) || s.shiny
+        : (female && s.female) || s.default;
+    return {...p, spriteUrl: url || s.default};
+}
+
 //function to read data from PokeAPI and shap it into a TeamPokemon
 async function fetchPokemon(idOrName:number | string): Promise<TeamPokemon> {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`);
@@ -23,10 +32,24 @@ async function fetchPokemon(idOrName:number | string): Promise<TeamPokemon> {
     const data = await res.json();
     const stat = (name: string) => data.stats.find((s: any) => s.stat.name === name).base_stat;
 
-    return {
+    const speciesRes = await fetch(data.species.url);
+    if(!speciesRes.ok) throw new Error(`PokeAPI species request failed: ${speciesRes.status}`);
+    const speciesData = await speciesRes.json();
+    const genderRate = speciesData.gender_rate;
+    const genderOptions: ('male' | 'female')[] =
+        genderRate === -1 ? []
+        : genderRate === 0 ? ['male']
+        : genderRate === 8 ? ['female']
+        : ['male', 'female'];
+    
+    const availableAbilities = data.abilities.map((a: any) => ({ name: a.ability.name, hidden: a.is_hidden }));
+    const home = data.sprites.other.home;
+
+
+    return withSprite({
         id: String(data.id), //note: this is species id for the pokemon, dont forget
         name: data.name,
-        spriteUrl: data.sprites.other.home.front_default ?? pokeball,
+        spriteUrl: home.front_default ?? pokeball,
         baseStats: {
             hp: stat('hp'),
             atk: stat('attack'),
@@ -37,8 +60,24 @@ async function fetchPokemon(idOrName:number | string): Promise<TeamPokemon> {
         },
         moves: [null, null, null, null],
         item: null,
-        availableMoves: data.moves.map((m: any) => m.move.name)
-    };
+        availableMoves: data.moves.map((m: any) => m.move.name),
+
+        //defaults for a freshly picked pokemon
+        nature: 'serious',
+        ability: availableAbilities[0]?.name ?? null, //first ability = regular slot 1
+        availableAbilities,
+        gender: genderOptions[0] ?? null, //male if it can be either
+        genderOptions,
+        shiny: false,
+        level: 50,
+        evs: { hp: 0, atk: 0, def: 0, spatk: 0, spdef: 0, spe: 0 },
+        sprites: {
+            default: home.front_default ?? pokeball,
+            shiny: home.front_shiny,
+            female: home.front_female,
+            shinyFemale: home.front_shiny_female
+        }
+    });
 }
 
 const GRAPHQL_URL = 'https://graphql.pokeapi.co/v1beta2';
@@ -167,19 +206,34 @@ export default function TeamViewer(){
     useEffect(() => {
         async function loadTeam() {
             try {
-                 const res = await axios.get(`${API}/teams/${teamId}`, {headers: await authHeader()});
-                 setTeamName(res.data.name);
+                const res = await axios.get(`${API}/teams/${teamId}`, {headers: await authHeader()});
+                setTeamName(res.data.name);
 
-                 const loaded: (TeamPokemon | null)[] = Array(TEAM_SIZE).fill(null);
-                 await Promise.all(res.data.team_pokemon.map(async (row: any) => {
+                const loaded: (TeamPokemon | null)[] = Array(TEAM_SIZE).fill(null);
+                
+                await Promise.all(res.data.team_pokemon.map(async (row: any) => {
                     const pokemon = await fetchPokemon(row.species_id);
-                    loaded[row.slot] = {
+                    loaded[row.slot] = withSprite({
                         ...pokemon,
                         item: row.item,
-                        moves: [row.move1, row.move2, row.move3, row.move4]
-                    };
-                 }));
-                 setTeam(loaded);
+                        moves: [row.move1, row.move2, row.move3, row.move4],
+                        nature: row.nature ?? pokemon.nature,
+                        ability: row.ability ?? pokemon.ability, //old rows have null, so use the default
+                        gender: row.gender ?? pokemon.gender,
+                        shiny: row.shiny,
+                        level: row.level,
+                        evs: {
+                            hp: row.ev_hp,
+                            atk: row.ev_atk,
+                            def: row.ev_def,
+                            spatk: row.ev_spa,
+                            spdef: row.ev_spd,
+                            spe: row.ev_spe
+                        }
+                    });
+                }));
+                 
+                setTeam(loaded);
 
             } catch (error) {
                 console.error('Could not load team', error)
@@ -287,7 +341,18 @@ export default function TeamViewer(){
         setStatus('');
         try {
             const pokemon = team.flatMap((p, slot) =>
-                p ? [{slot, species_id: Number(p.id), item: p.item ?? null, moves: p.moves }] : []
+                p ? [{
+                        slot, 
+                        species_id: Number(p.id), 
+                        item: p.item ?? null, 
+                        moves: p.moves,
+                        nature: p.nature,
+                        ability: p.ability,
+                        gender: p.gender,
+                        shiny: p.shiny,
+                        level: p.level,
+                        evs: p.evs 
+                    }] : []
             );
             await axios.put(`${API}/teams/${teamId}`, {name: teamName, pokemon}, {headers: await authHeader()});
             setStatus('Saved');
@@ -359,7 +424,7 @@ export default function TeamViewer(){
                         <Modal onClose={closeEditor}>
                             <PokemonEditor
                                 pokemon={draft}
-                                onChange={changes => setDraft(prev => (prev ? {...prev, ...changes} : prev))}
+                                onChange={changes => setDraft(prev => (prev ? withSprite({...prev, ...changes}) : prev))}
                                 itemOptions={allItemNames}
                             />
                             <button onClick={saveEditor}>Save</button>
