@@ -5,6 +5,7 @@ export interface PokemonImage{
     id: string;
     name: string;
     spriteUrl: string;
+    fallbackUrl?: string;
 }
 
 export interface Stats {
@@ -48,7 +49,7 @@ export interface PokemonTeam {
     id: string;
     title: string;
     last_modified: Date;
-    pokemon: PokemonImage[];
+    pokemon: (PokemonImage | null)[];
 }
 
 export interface PokemonSummary extends PokemonImage{

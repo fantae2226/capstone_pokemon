@@ -225,7 +225,7 @@ app.get('/teams', async (req, res) => {
 
     const {data, error} = await supabaseAdmin
         .from('teams')
-        .select('*')
+        .select('*, team_pokemon(slot, species_id, shiny, gender)')
         .eq('user_id', user.id)
         .order('updated_at', {ascending: false});
     

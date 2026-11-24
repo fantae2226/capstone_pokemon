@@ -11,7 +11,7 @@ interface PokeTeamContainerProps {
     id: string;
     title: string;
     last_modified: Date;
-    pokemon?: PokemonImage[];
+    pokemon?: (PokemonImage | null)[];
     onDelete: (id: string) => void;
 }
 
@@ -39,9 +39,15 @@ export default function PokeTeamContainer({id, title, last_modified, pokemon = [
             <div className="team_container_sprites">
                 {slots.map((pokemonSprite, i) => 
                     pokemonSprite ? (
-                        <img key={pokemonSprite.id} 
+                        <img key={`slot-${i}`} 
                              src={pokemonSprite.spriteUrl}
                              alt={pokemonSprite.name}
+                             onError={e => {
+                                 //female sprite missing -> swap to the normal one (only once, so it can't loop)
+                                 if(pokemonSprite.fallbackUrl && e.currentTarget.src !== pokemonSprite.fallbackUrl){
+                                     e.currentTarget.src = pokemonSprite.fallbackUrl;
+                                 }
+                             }}
                         />
                     ) : (
                         <img key={`empty-${i}`} 

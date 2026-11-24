@@ -3,12 +3,28 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import supabase from "@/lib/supabase"
 import PokeTeamContainer from "@/components/EditTeams/PokeTeamContainer"
-import type { PokemonTeam } from "@/types/pokemon"
+import type { PokemonTeam, PokemonImage } from "@/types/pokemon"
 
 
 
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const TEAM_SIZE = 6;
+const SPRITE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home';
+
+//build a PokemonImage type shaped response from a pokemon Home sprite
+function rowToSprite(row: any): PokemonImage {
+    const shinyFolder = row.shiny ? '/shiny' : '';
+    const female = row.gender === 'female';
+    const femaleFolder = female ? '/female' : '';
+    return {
+        id: String(row.species_id),
+        name: `Pokemon #${row.species_id}`,
+        spriteUrl: `${SPRITE_URL}${shinyFolder}${femaleFolder}/${row.species_id}.png`,
+        fallbackUrl: female ? `${SPRITE_URL}${shinyFolder}/${row.species_id}.png` : undefined
+    };
+}
+
 
 //page that holds all of a users teams
 export default function BrowseTeams(){
@@ -27,11 +43,15 @@ export default function BrowseTeams(){
     }
 
     function rowToTeam(row: any): PokemonTeam {
+        const pokemon: (PokemonImage | null)[] = Array(TEAM_SIZE).fill(null);
+        (row.team_pokemon ?? []).forEach((p: any) => {
+            pokemon[p.slot] = rowToSprite(p);
+        });
         return {
             id: row.id,
             title: row.name,
             last_modified: new Date(row.updated_at),
-            pokemon: []
+            pokemon
         };
     }
 
