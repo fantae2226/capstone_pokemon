@@ -1,7 +1,7 @@
 import User from '@/assets/User.png'
 import Pokeball from '@/assets/Pokeball.png'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css'
 
 // Checking if new repo works
@@ -9,6 +9,7 @@ import './Navbar.css'
 export default function Navbar(){
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
+    const { pathname } = useLocation();
 
 
     return (
@@ -25,9 +26,17 @@ export default function Navbar(){
                     <span></span>
                     <span></span>
                 </div>
+
                 <div className='nav_link'>
-                    <button value="browse_pokemon">Browse Pokemon</button>
+                    <button className={pathname === '/dashboard' ? 'active' : ''}
+                        onClick={() => navigate('/dashboard')}
+                    >
+                        Dashboard
+                    </button>
                 </div>
+                {/* <div className='nav_link'>
+                    <button value="browse_pokemon">Browse Pokemon</button>
+                </div> */}
                 <div className='nav_link'>
                     <button className='browse_teams'
                         value="browse_teams"

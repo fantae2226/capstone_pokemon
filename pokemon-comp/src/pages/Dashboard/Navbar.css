@@ -1,49 +1,80 @@
-
 .main_nav{
     display: flex;
-    justify-content: center;
-    font-family: 'Press Start 2P', 'Times New Roman', Times, serif;
+    justify-content: space-between;   /* was center: logo left, links right */
     align-items: center;
+    gap: 28px;
     position: relative;
     width: 100%;
+    box-sizing: border-box;
+    padding: 12px 32px;
+    background: #0e121a;
+    border-bottom: 3px solid var(--pc-red);
+    font-family: var(--pc-font-pixel);  /* was 'Press Start 2P' */
 }
 
 .logo{
     display: flex;
-    justify-content: center;
-    font-size: 16px;
-    justify-content: center;
     align-items: center;
-    gap: 16px;
-    border: 2px solid red;
+    gap: 12px;
+    margin-right: auto;               /* pushes the links to the right */
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: var(--pc-text);
+    /* removed: border: 2px solid red; */
+}
+
+.logo img{
+    width: 32px;
+    height: 32px;
 }
 
 .nav_link {
-    margin: 5px 50px;
     list-style-type: none;
     text-align: center;
+    /* removed margin: 5px 50px; the gap on .main_nav spaces them now */
 }
 
-button{
-    font-size: 12px;
+/* was a global "button { }" rule that affected every button on the site */
+.nav_link button{
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 15px;
+    color: var(--pc-text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 12px 0;
     cursor: pointer;
+}
+
+.nav_link button:hover{
+    color: var(--pc-text);
+}
+
+.nav_link button.active{
+    color: var(--pc-blue-text);
+    border-bottom-color: var(--pc-blue-text);
 }
 
 .user_wrapper{
     display: flex;
+    align-items: center;
     gap: 0.5rem;
 }
 
-.user{
-    width: 50px;
-    height: 50px;
+.nav_link .user{
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 2px solid var(--pc-line);
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 .user_profile{
     width: 100%;
     height: 100%;
-    background-color: red;
-    border-radius: 5px;
+    background-color: var(--pc-panel-2);   /* was red */
+    border-radius: 50%;
 }
 
 .username{
@@ -54,7 +85,7 @@ button{
     display: none;
     position: absolute;
     top: 1rem;
-    right: 0.5rem;
+    right: 1rem;
     flex-direction: column;
     justify-content: space-between;
     width: 2.25rem;
@@ -65,7 +96,7 @@ button{
 .menu_hamburger span {
     height: 0.4rem;
     width: 100%;
-    background-color: #000000;
+    background-color: var(--pc-text);   /* was black, invisible on dark */
     border-radius: 0.2rem;
     display: block;
 }
@@ -94,15 +125,18 @@ button{
         width: 100%;
         text-align: center;
     }
-    
-    .user {
+
+    .nav_link .user {
         max-width: fit-content;
+        width: auto;
+        border-radius: 20px;
         text-align: center;
     }
     .username{
         display: flex;
         flex-direction: row;
         align-items: center;
+        color: var(--pc-text);
     }
     .main_nav.menu-open .nav_link {
         display: block;
