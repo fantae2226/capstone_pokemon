@@ -1,7 +1,7 @@
 .browse_teams {
-    max-width: 1200px;
+    max-width: 1760px;    /* was 1200px */
     margin: 0 auto;
-    padding: 36px 24px 56px;
+    padding: 36px 32px 56px;   /* was 36px 24px: lines up with the navbar's 32px side padding */
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -32,11 +32,11 @@
 
 .teams_container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));   /* was 340px */
-    gap: 16px;                                                        /* was 14px */
+    grid-template-columns: repeat(2, minmax(0, 1fr));   /* was repeat(auto-fill, minmax(460px, 1fr)) */
+    gap: 20px;                                           /* was 16px */
 }
 
-@media (max-width: 520px) {
+@media (max-width: 960px) {      /* was max-width: 520px */
     .teams_container {
         grid-template-columns: 1fr;
     }
