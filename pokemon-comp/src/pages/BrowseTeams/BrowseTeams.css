@@ -1,0 +1,43 @@
+.browse_teams {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.browse_teams_header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.browse_teams_label {
+    font-size: 14px;
+    color: var(--pc-blue-text);
+}
+
+.browse_teams_count {
+    margin: 2px 0 0;
+    font-size: 26px;
+    font-weight: 500;
+}
+
+.add_btn {
+    text-transform: uppercase;
+}
+
+.teams_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));   /* was 340px */
+    gap: 16px;                                                        /* was 14px */
+}
+
+@media (max-width: 520px) {
+    .teams_container {
+        grid-template-columns: 1fr;
+    }
+}

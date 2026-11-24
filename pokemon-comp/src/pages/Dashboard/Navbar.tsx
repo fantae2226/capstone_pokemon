@@ -38,7 +38,7 @@ export default function Navbar(){
                     <button value="browse_pokemon">Browse Pokemon</button>
                 </div> */}
                 <div className='nav_link'>
-                    <button className='browse_teams'
+                    <button className={`browse_teams ${pathname === '/browse-teams' ? 'active' : ''}`}
                         value="browse_teams"
                         onClick={() => navigate('/browse-teams')}
                     >

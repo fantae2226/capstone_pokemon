@@ -1,147 +1,145 @@
-/* ==========================================================================
-   PokeTeamContainer.css
-   Card component for displaying a single Pokémon team with sprite grid
-   ========================================================================== */
-
-:root {
-  --team-bg: rgba(255, 255, 255, 0.04);
-  --team-border: rgba(255, 255, 255, 0.08);
-  --team-border-hover: rgba(108, 140, 255, 0.4);
-  --team-surface: rgba(0, 0, 0, 0.25);
-  --team-surface-hover: rgba(255, 255, 255, 0.08);
-  --team-accent: #6c8cff;
-  --team-danger: #ff6b6b;
-  --team-danger-hover: #ff8a8a;
-  --team-text: #f2f3f7;
-  --team-text-muted: #9aa0ae;
-  --team-radius: 14px;
-  --team-radius-sm: 8px;
-  --team-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
 .team_container {
-  background: var(--team-bg);
-  border: 1px solid var(--team-border);
-  border-radius: var(--team-radius);
-  box-shadow: var(--team-shadow);
-  padding: 1.25rem 1.5rem;
-  color: var(--team-text);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  background: var(--pc-panel);
+  color: var(--pc-text);
+  display: flex;
+  flex-direction: column;
 }
 
-.team_container:hover {
-  border-color: var(--team-border-hover);
-}
-
-/* ---------- Header ---------- */
-
+/* paper nameplate slanting into the dark card */
 .team_container_header {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  align-items: stretch;
+  min-height: 62px;
+}
+
+.team_container_name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 40px 8px 18px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 26px) 100%, 0 100%);
 }
 
 .team_container_title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--team-text);
-  flex-shrink: 0;
+  font-size: 17px;
+  font-weight: 500;
 }
 
 .team_container_date {
-  font-size: 0.8rem;
-  color: var(--team-text-muted);
-  margin-right: auto;
+  font-size: 12px;
+  color: var(--pc-paper-muted);
 }
 
-.edit_btn,
-.delete_btn {
+.team_container_count {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 1px solid var(--team-border);
-  border-radius: var(--team-radius-sm);
-  cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  padding: 0 16px;
+  font-size: 12px;
+  color: var(--pc-text-muted);
 }
 
-.edit_btn:hover {
-  background: var(--team-surface-hover);
-  border-color: var(--team-accent);
-}
-
-.delete_btn:hover {
-  background: rgba(255, 107, 107, 0.12);
-  border-color: var(--team-danger);
-}
-
-.edit_icon,
-.delete_icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  opacity: 0.85;
-}
-
-.edit_btn:hover .edit_icon,
-.delete_btn:hover .delete_icon {
-  opacity: 1;
-}
-
-/* ---------- Sprite grid ---------- */
-
+/* sprites */
 .team_container_sprites {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 0.6rem;
+  gap: 8px;
+  padding: 16px 18px;
 }
 
 .team_container_sprites img {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: contain;
-  background: var(--team-surface);
-  border: 1px solid var(--team-border);
-  border-radius: var(--team-radius-sm);
-  padding: 0.4rem;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  box-sizing: border-box;
+  padding: 4px;
+  background: var(--pc-panel-2);
+  border-radius: 50%;
 }
 
-.team_container_sprites img:hover {
-  border-color: var(--team-accent);
-  transform: translateY(-2px);
-}
-
-/* Empty slots (default pokeball) render slightly dimmer to distinguish
-   them from filled team members */
 .team_container_sprites img[alt="Empty team slot"] {
-  opacity: 0.45;
+  background: transparent;
+  border: 1px dashed #3a4659;
+  padding: 10px;
+  opacity: 0.35;
 }
 
-.team_container_sprites img[alt="Empty team slot"]:hover {
-  opacity: 0.7;
-  border-color: var(--team-border);
-  transform: none;
+/* buttons */
+.team_container_actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 18px 16px;
 }
 
-/* ---------- Responsive ---------- */
+.edit_btn {
+  height: 40px;
+  padding: 0 18px;
+  background: var(--pc-panel-2);
+  color: #8cc0f4;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit_btn:hover {
+  background: #24304a;
+}
+
+.delete_btn {
+  height: 40px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--pc-red-text);
+  border: 1px solid #5a2a30;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete_btn:hover {
+  background: rgba(224, 72, 79, 0.12);
+}
+
+/* delete confirmation */
+.team_container_confirm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 18px 16px;
+  padding: 10px 12px;
+  background: #2a1418;
+  border-left: 3px solid var(--pc-red);
+  font-size: 13px;
+  color: #f3c9cc;
+}
+
+.team_container_confirm_btns {
+  display: flex;
+  gap: 6px;
+}
+
+.keep_btn,
+.confirm_delete_btn {
+  height: 36px;
+  padding: 0 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.keep_btn {
+  background: var(--pc-panel-2);
+  color: var(--pc-text);
+}
+
+.confirm_delete_btn {
+  background: #b8323a;
+  color: #ffffff;
+}
 
 @media (max-width: 640px) {
   .team_container_sprites {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .team_container_header {
-    flex-wrap: wrap;
-  }
-
-  .team_container_date {
-    order: 3;
-    flex-basis: 100%;
-    margin-right: 0;
   }
 }

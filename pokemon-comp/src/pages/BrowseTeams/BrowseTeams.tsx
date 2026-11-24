@@ -4,6 +4,8 @@ import axios from "axios"
 import supabase from "@/lib/supabase"
 import PokeTeamContainer from "@/components/EditTeams/PokeTeamContainer"
 import type { PokemonTeam, PokemonImage } from "@/types/pokemon"
+import Navbar from "../Dashboard/Navbar";
+import "./BrowseTeams.css";
 
 
 
@@ -111,21 +113,32 @@ export default function BrowseTeams(){
         <div className="relative min-h-screen">
             <HexagonBackground className="fixed inset-0" />
             <div className="relative">
-                <button className="add_btn" onClick={addTeam}>
-                    Add Team
-                </button>
-                <div className="teams_container">
-                    {teams.map(team => (
-                        <PokeTeamContainer
-                            key={team.id}
-                            id={team.id}
-                            title={team.title}
-                            last_modified={team.last_modified}
-                            pokemon={team.pokemon}
-                            onDelete={deleteTeam}
-                        />
-                    ))}
-                </div>
+                <Navbar />
+                <main className="browse_teams">
+                    <div className="browse_teams_header">
+                        <div>
+                            <div className="browse_teams_label pc-pixel">YOUR TEAMS</div>
+                            <h1 className="browse_teams_count">
+                                {teams.length} {teams.length === 1 ? 'team' : 'teams'}
+                            </h1>
+                        </div>
+                        <button className="add_btn pc-btn pc-btn-primary" onClick={addTeam}>
+                            Add Team
+                        </button>
+                    </div>
+                    <div className="teams_container">
+                        {teams.map(team => (
+                            <PokeTeamContainer
+                                key={team.id}
+                                id={team.id}
+                                title={team.title}
+                                last_modified={team.last_modified}
+                                pokemon={team.pokemon}
+                                onDelete={deleteTeam}
+                            />
+                        ))}
+                    </div>
+                </main>
             </div>
         </div>
     )

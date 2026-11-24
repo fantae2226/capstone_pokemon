@@ -7,6 +7,10 @@ import BrowseTeams from './BrowseTeams';
 vi.mock('@/components/animate-ui/components/backgrounds/hexagon', () => ({
     HexagonBackground: () => <div data-testid="hexagon-background" />,
 }));
+// navbar needs a router, swapped for a plain element
+vi.mock('../Dashboard/Navbar', () => ({
+    default: () => <nav data-testid="navbar" />,
+}));
 
 describe('BrowseTeams', () => {
     it('renders the background, the Add Team button and the teams container', () => {
