@@ -7,8 +7,7 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    --color-sidebar-ring: var(--sidebar-ring);
+    --font-sans: 'M PLUS Rounded 1c', sans-serif;    --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-accent: var(--sidebar-accent);
@@ -84,8 +83,8 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
+    --background: #0b0e14;   
+    --foreground: #e8f4ff;
     --card: oklch(0.205 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
@@ -127,4 +126,106 @@
   html {
     @apply font-sans;
     }
+}
+
+
+/* ---------- PokeComp design system ---------- */
+:root {
+  /* dark frame */
+  --pc-bg: #0b0e14;
+  --pc-frame: #1a1d24;
+  --pc-panel: #121823;
+  --pc-panel-2: #1c2433;
+  --pc-line: #2a3447;
+  --pc-text: #e8f4ff;
+  --pc-text-muted: #a9b4c6;
+
+  /* accents: red = state, blue = interaction */
+  --pc-red: #e0484f;
+  --pc-red-text: #ef5a61;
+  --pc-blue: #2b6cb8;
+  --pc-blue-text: #5aa2ec;
+
+  /* paper */
+  --pc-paper: #ddd6c6;
+  --pc-paper-line: rgba(140, 110, 70, 0.25);
+  --pc-paper-text: #2a241a;
+  --pc-paper-muted: #5a5040;
+
+  /* fonts */
+  --pc-font-pixel: 'Pixelify Sans', monospace;
+  --pc-font-mono: 'JetBrains Mono', monospace;
+}
+
+/* shapes */
+.pc-cut {
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+.pc-slant {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+/* surfaces */
+.pc-panel {
+  background: var(--pc-panel);
+  color: var(--pc-text);
+}
+.pc-paper {
+  background-color: var(--pc-paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 19px,
+    var(--pc-paper-line) 19px, var(--pc-paper-line) 20px
+  );
+  color: var(--pc-paper-text);
+}
+
+/* dark label slanting into paper: <div class="pc-label-row pc-paper"><span class="pc-label">Item</span><span class="pc-value">Choice Scarf</span></div> */
+.pc-label-row {
+  display: flex;
+  align-items: stretch;
+  min-height: 38px;
+}
+.pc-label-row > .pc-label {
+  flex: none;
+  width: 104px;
+  display: flex;
+  align-items: center;
+  padding-left: 14px;
+  background: var(--pc-panel-2);
+  color: #c9d2de;
+  font-size: 13px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+.pc-label-row > .pc-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+}
+
+/* text */
+.pc-pixel { font-family: var(--pc-font-pixel); }
+.pc-mono  { font-family: var(--pc-font-mono); }
+
+/* buttons */
+.pc-btn {
+  font-family: var(--pc-font-pixel);
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  cursor: pointer;
+  background: var(--pc-panel-2);
+  color: var(--pc-text);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.pc-btn-primary {
+  background: var(--pc-blue);
+  color: #ffffff;
+}
+.pc-btn-danger {
+  background: transparent;
+  color: var(--pc-red-text);
+  border: 1px solid #5a2a30;
+  clip-path: none;
 }
