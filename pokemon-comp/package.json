@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:api": "newman run test/postman/PokeComp.postman_collection.json -e test/postman/local.postman_environment.json"
+    "test:api": "newman run test/postman/PokeComp.postman_collection.json -e test/postman/local.postman_environment.json",
+    "test:api:render": "newman run test/postman/PokeComp.postman_collection.json -e test/postman/local.postman_environment.json --env-var baseUrl=https://pokecomp-api.onrender.com --timeout-request 60000"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
