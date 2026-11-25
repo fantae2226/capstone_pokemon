@@ -28,6 +28,12 @@ app.get('/', (req, res) => {
 //signup user to supabase database. Logs data in both Auth and users tables
 app.post('/signup', async (req, res) => {
     const { username, email, password, confirmPass } = req.body;
+
+     //the frontend checks these too, but anyone can call this route directly, so check again here
+    const inputError = validateEmail(email ?? '') || validatePassword(password ?? '');
+    if (inputError) {
+        return res.status(400).json({ message: 'Signup failed', error: inputError });
+    }
     
     //supabase auth creates user and hashes password
     const {data, error} = await supabase.auth.signUp({

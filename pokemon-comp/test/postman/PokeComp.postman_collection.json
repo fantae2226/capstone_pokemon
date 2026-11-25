@@ -1,0 +1,1168 @@
+{
+  "info": {
+    "name": "PokeComp API",
+    "description": "Backend tests for PokeComp. Run with the 'PokeComp Local' environment selected and the backend running (npm run dev:backend). Run folders in order: 1 Setup logs in first, 3 Teams creates and then deletes its own team, 4 User changes the password and changes it back.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1 Setup",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Says hello\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Hello, World!\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          }
+        },
+        {
+          "name": "Login (Supabase)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns an access token and saves it\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.access_token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.environment.set(\"token\", body.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseKey}}"
+              }
+            ],
+            "url": "{{supabaseUrl}}/auth/v1/token?grant_type=password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Logs the test account in through Supabase Auth and saves the access token for every later request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 Auth guard",
+      "item": [
+        {
+          "name": "GET /teams without a token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Not Logged In\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Not Logged In\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET /teams with a fake token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Invalid Session\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Invalid Session\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "not-a-real-token",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /teams without a token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Not Logged In\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Not Logged In\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/teams",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 Teams",
+      "item": [
+        {
+          "name": "Create team",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Creates an empty team called New Team and saves its id\", () => {",
+                  "    const team = pm.response.json();",
+                  "    pm.expect(team.name).to.eql(\"New Team\");",
+                  "    pm.expect(team.id).to.exist;",
+                  "    pm.environment.set(\"teamId\", team.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/teams"
+          }
+        },
+        {
+          "name": "List teams",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns an array that includes the new team\", () => {",
+                  "    const teams = pm.response.json();",
+                  "    pm.expect(teams).to.be.an(\"array\");",
+                  "    const ids = teams.map(t => String(t.id));",
+                  "    pm.expect(ids).to.include(String(pm.environment.get(\"teamId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams"
+          }
+        },
+        {
+          "name": "Get one team",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns the right team with an empty team_pokemon list\", () => {",
+                  "    const team = pm.response.json();",
+                  "    pm.expect(String(team.id)).to.eql(String(pm.environment.get(\"teamId\")));",
+                  "    pm.expect(team.team_pokemon).to.be.an(\"array\").that.is.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}"
+          }
+        },
+        {
+          "name": "Save team (valid Garchomp)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Says Team Saved\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Team Saved\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"  Postman Team  \",\n    \"pokemon\": [\n        {\n            \"slot\": 0,\n            \"species_id\": 445,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 50,\n            \"evs\": {\n                \"hp\": 0,\n                \"atk\": 252,\n                \"def\": 0,\n                \"spatk\": 0,\n                \"spdef\": 4,\n                \"spe\": 252\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get team after saving",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Name was trimmed and saved\", () => {",
+                  "    pm.expect(pm.response.json().name).to.eql(\"Postman Team\");",
+                  "});",
+                  "",
+                  "pm.test(\"Garchomp was saved in slot 0 with its moves and EVs\", () => {",
+                  "    const p = pm.response.json().team_pokemon[0];",
+                  "    pm.expect(p.slot).to.eql(0);",
+                  "    pm.expect(p.species_id).to.eql(445);",
+                  "    pm.expect(p.move1).to.eql(\"earthquake\");",
+                  "    pm.expect(p.move2).to.eql(\"dragon-claw\");",
+                  "    pm.expect(p.move3).to.eql(null);",
+                  "    pm.expect(p.nature).to.eql(\"jolly\");",
+                  "    pm.expect(p.ev_atk).to.eql(252);",
+                  "    pm.expect(p.ev_spe).to.eql(252);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}"
+          }
+        },
+        {
+          "name": "Save team with an empty name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Team name is required\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Team name is required\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"   \",\n    \"pokemon\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Save team with slot 7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Invalid Pokemon Data\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Invalid Pokemon Data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Postman Team\",\n    \"pokemon\": [\n        {\n            \"slot\": 7,\n            \"species_id\": 445,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 50,\n            \"evs\": {\n                \"hp\": 0,\n                \"atk\": 252,\n                \"def\": 0,\n                \"spatk\": 0,\n                \"spdef\": 4,\n                \"spe\": 252\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Save team with 300 Attack EVs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Invalid Pokemon Data\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Invalid Pokemon Data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Postman Team\",\n    \"pokemon\": [\n        {\n            \"slot\": 0,\n            \"species_id\": 445,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 50,\n            \"evs\": {\n                \"atk\": 300\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Save team with over 510 total EVs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Invalid Pokemon Data\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Invalid Pokemon Data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Postman Team\",\n    \"pokemon\": [\n        {\n            \"slot\": 0,\n            \"species_id\": 445,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 50,\n            \"evs\": {\n                \"hp\": 252,\n                \"atk\": 252,\n                \"def\": 252\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Save team with two Pokemon in one slot",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Invalid Pokemon Data\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Invalid Pokemon Data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Postman Team\",\n    \"pokemon\": [\n        {\n            \"slot\": 0,\n            \"species_id\": 445,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 50,\n            \"evs\": {\n                \"hp\": 0,\n                \"atk\": 252,\n                \"def\": 0,\n                \"spatk\": 0,\n                \"spdef\": 4,\n                \"spe\": 252\n            }\n        },\n        {\n            \"slot\": 0,\n            \"species_id\": 279,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 50,\n            \"evs\": {\n                \"hp\": 0,\n                \"atk\": 252,\n                \"def\": 0,\n                \"spatk\": 0,\n                \"spdef\": 4,\n                \"spe\": 252\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Save team with level 101",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Invalid Pokemon Data\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Invalid Pokemon Data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Postman Team\",\n    \"pokemon\": [\n        {\n            \"slot\": 0,\n            \"species_id\": 445,\n            \"item\": \"choice-scarf\",\n            \"moves\": [\n                \"earthquake\",\n                \"dragon-claw\",\n                null,\n                null\n            ],\n            \"nature\": \"jolly\",\n            \"ability\": \"rough-skin\",\n            \"gender\": \"male\",\n            \"shiny\": false,\n            \"level\": 101,\n            \"evs\": {\n                \"hp\": 0,\n                \"atk\": 252,\n                \"def\": 0,\n                \"spatk\": 0,\n                \"spdef\": 4,\n                \"spe\": 252\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get a team that does not exist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Team not found\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Team not found\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams/00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "name": "Delete team",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Says Team deleted\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Team deleted\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}"
+          }
+        },
+        {
+          "name": "Delete the same team again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Team not found\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Team not found\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 User",
+      "item": [
+        {
+          "name": "Username too short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Username must be at least 3 characters long.\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Username must be at least 3 characters long.\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/username",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"ab\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns the trimmed username\", () => {",
+                  "    pm.expect(pm.response.json().username).to.eql(\"postman-test\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/username",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"  postman-test  \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Credentials: nothing to change",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Nothing to change\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Nothing to change\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Credentials: current password missing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Current password required\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Current password required\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"newPassword\": \"{{tempPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Credentials: weak new password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Explains the password rules\", () => {",
+                  "    pm.expect(pm.response.json().error).to.include(\"uppercase letter\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"{{testPassword}}\",\n    \"newPassword\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Credentials: wrong current password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test(\"Error says \\\"Current password is incorrect\\\"\", () => {",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Current password is incorrect\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"WrongPass1!\",\n    \"newPassword\": \"{{tempPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Credentials: change password to temp",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Asks the user to sign in again\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Credentials updated. Please sign in again\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"{{testPassword}}\",\n    \"newPassword\": \"{{tempPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login with the temp password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns an access token and saves it\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.access_token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.environment.set(\"token\", body.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseKey}}"
+              }
+            ],
+            "url": "{{supabaseUrl}}/auth/v1/token?grant_type=password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{tempPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Logs the test account in through Supabase Auth and saves the access token for every later request."
+          }
+        },
+        {
+          "name": "Credentials: change password back",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Asks the user to sign in again\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Credentials updated. Please sign in again\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/user/credentials",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"{{tempPassword}}\",\n    \"newPassword\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login with the original password again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns an access token and saves it\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.access_token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.environment.set(\"token\", body.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabaseKey}}"
+              }
+            ],
+            "url": "{{supabaseUrl}}/auth/v1/token?grant_type=password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Logs the test account in through Supabase Auth and saves the access token for every later request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 Signup",
+      "item": [
+        {
+          "name": "Sign up a new user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// a brand-new email every run, e.g. postman-signup-1764042000000@example.com",
+                  "pm.environment.set(\"signupEmail\", `postman-signup-${Date.now()}@example.com`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Says Signup successful\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Signup successful\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"postman-signup\",\n    \"email\": \"{{signupEmail}}\",\n    \"password\": \"Postman1!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Sign up with an email that already exists",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Says Signup failed\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Signup failed\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"postman-dup\",\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"Postman1!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Sign up without a password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Says Signup failed\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Signup failed\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"postman-nopass\",\n    \"email\": \"postman-nopass@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Sign up with a weak password",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// unique email so a duplicate-email error cannot make this pass by accident",
+                  "pm.environment.set(\"weakEmail\", `postman-weak-${Date.now()}@example.com`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Says Signup failed\", () => {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Signup failed\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"postman-weak\",\n    \"email\": \"{{weakEmail}}\",\n    \"password\": \"abcdef\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

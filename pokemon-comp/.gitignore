@@ -23,4 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environments
+test/postman/local.postman_environment.json
 .env

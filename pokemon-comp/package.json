@@ -10,7 +10,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "test:api": "newman run test/postman/PokeComp.postman_collection.json -e test/postman/local.postman_environment.json"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
@@ -50,6 +51,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "jsdom": "^29.1.1",
+    "newman": "^6.2.3",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10",
