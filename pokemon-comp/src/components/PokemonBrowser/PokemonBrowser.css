@@ -1,20 +1,438 @@
-.pokemon_browser { width: min(60rem, 85vw); }
-.table_scroll { max-height: 60vh; overflow: auto; }
-.table_scroll th { position: sticky; top: 0; z-index: 1; background: #ffffff; text-align: left; cursor: pointer; user-select: none; }
-.table_scroll tbody tr { cursor: pointer; }
-.table_scroll tbody tr:hover { background: #f3f4f6; }
+/* ==========================================================================
+   PokemonBrowser.css
+   One "screen" (blue strip) inside the popup frame: search, filters, table
+   ========================================================================== */
 
-.filter_chips { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; min-height: 1.75rem; }
-.chip { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.5rem; border-radius: 999px; background: #e5e7eb; text-transform: capitalize; }
+.pokemon_browser {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 28px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--pc-bg);
+    border-top: 4px solid var(--pc-blue);
+    color: var(--pc-text);
+}
 
-.type_picker { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-.type_btn { text-transform: capitalize; }
-.type_btn_active { outline: 2px solid #000000; }
-.type_btn:disabled { opacity: 0.35; cursor: not-allowed; }
+/* ---------- header ---------- */
 
-.filter_modal { display: flex; flex-direction: column; gap: 0.75rem; width: min(28rem, 80vw); }
-.filter_sections { display: flex; gap: 0.5rem; }
-.filter_section { display: flex; flex-direction: column; gap: 0.5rem; }
-.suggestions { list-style: none; margin: 0; padding: 0; max-height: 15rem; overflow-y: auto; text-transform: capitalize; }
-.suggestions button { width: 100%; text-align: left; }
-.filter_actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.browser_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.browser_title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 400;
+}
+
+.browser_cancel {
+    height: 52px;
+    padding: 0 26px;
+    font-size: 17px;
+    text-transform: uppercase;
+}
+
+/* ---------- search + Add Filter ---------- */
+
+.browser_toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.browser_search {
+    flex: 1 1 320px;
+    height: 56px;
+    box-sizing: border-box;
+    padding: 0 18px;
+    font-size: 18px;
+    color: var(--pc-text);
+    background: var(--pc-panel);
+    border: 1px solid var(--pc-line);
+}
+
+.browser_search::placeholder,
+.filter_section input::placeholder {
+    color: #7d889b;
+}
+
+.browser_search:focus,
+.filter_section input:focus {
+    outline: 2px solid var(--pc-blue);
+    outline-offset: 0;
+    border-color: var(--pc-blue);
+}
+
+.browser_filter_btn {
+    height: 56px;
+    padding: 0 24px;
+    font-family: var(--pc-font-pixel);
+    font-size: 17px;
+    text-transform: uppercase;
+    color: #8cc0f4;
+    background: var(--pc-panel);
+    border: 1px solid var(--pc-blue);
+    cursor: pointer;
+}
+
+.browser_filter_btn[aria-expanded="true"] {
+    background: #16233a;
+}
+
+.browser_filter_btn:disabled {
+    opacity: 0.5;
+    cursor: progress;
+}
+
+.browser_count {
+    font-size: 15px;
+    color: var(--pc-text-muted);
+}
+
+/* ---------- active filter chips: dark label slanting into paper ---------- */
+
+.filter_chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter_chips:empty {
+    display: none;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: stretch;
+    height: 40px;
+}
+
+.chip_label {
+    display: flex;
+    align-items: center;
+    padding: 0 22px 0 12px;
+    font-family: var(--pc-font-pixel);
+    font-size: 12px;
+    color: #c9d2de;
+    background: var(--pc-panel-2);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+
+.chip_value {
+    display: flex;
+    align-items: center;
+    padding: 0 4px 0 10px;
+    font-size: 16px;
+    text-transform: capitalize;
+}
+
+.chip button {
+    width: 40px;
+    font-size: 20px;
+    color: var(--pc-paper-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.chip button:hover {
+    color: #b8323a;
+}
+
+.reset_filters_btn {
+    height: 40px;
+    padding: 0 10px;
+    font-size: 15px;
+    color: var(--pc-red-text);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.browser_loading {
+    font-size: 15px;
+    color: var(--pc-text-muted);
+}
+
+/* ---------- filter panel (inline, not a popup) ---------- */
+
+.filter_panel {
+    padding: 20px;
+    background: var(--pc-panel);
+    border-left: 4px solid var(--pc-blue);
+}
+
+.filter_modal {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.filter_sections {
+    display: flex;
+    gap: 8px;
+}
+
+.filter_sections button {
+    height: 48px;
+    padding: 0 22px;
+    font-family: var(--pc-font-pixel);
+    font-size: 15px;
+    text-transform: uppercase;
+    color: var(--pc-text-muted);
+    background: var(--pc-panel-2);
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.filter_sections button.type_btn_active {
+    color: #ffffff;
+    background: var(--pc-blue);
+}
+
+.filter_hint {
+    margin: 0;
+    font-size: 15px;
+    color: var(--pc-text-muted);
+}
+
+.filter_section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter_section input {
+    height: 52px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    font-size: 17px;
+    color: var(--pc-text);
+    background: var(--pc-bg);
+    border: 1px solid var(--pc-line);
+}
+
+.filter_section input:disabled {
+    opacity: 0.6;
+}
+
+/* suggestions: paper rows with a slanted edge */
+.suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.suggestions button {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 36px 0 16px;
+    text-align: left;
+    font-size: 16px;
+    text-transform: capitalize;
+    color: var(--pc-paper-text);
+    background-color: var(--pc-paper);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 19px,
+        var(--pc-paper-line) 19px, var(--pc-paper-line) 20px
+    );
+    border: none;
+    border-left: 4px solid #c4bba8;
+    cursor: pointer;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+.suggestions button:hover {
+    background-color: #d3cbb8;
+    border-left-color: var(--pc-blue);
+}
+
+/* type picker: the official type labels as buttons */
+.type_picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.type_picker .type_btn {
+    padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.type_picker .type_btn img {
+    display: block;
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.type_picker .type_btn_active {
+    outline: 3px solid var(--pc-text);
+    outline-offset: 2px;
+}
+
+.type_picker .type_btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.filter_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.filter_actions .pc-btn {
+    height: 48px;
+    padding: 0 24px;
+    font-size: 15px;
+    text-transform: uppercase;
+}
+
+/* ---------- results table ---------- */
+
+.table_scroll {
+    max-height: 62vh;
+    overflow: auto;
+}
+
+.table_scroll table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: separate;
+    border-spacing: 0 4px;   /* 4px gap between rows */
+}
+
+.table_scroll th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: 44px;
+    padding: 0 12px;
+    text-align: left;
+    font-family: var(--pc-font-pixel);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--pc-text-muted);
+    background: var(--pc-panel);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.table_scroll th.th_stat {
+    text-align: right;
+}
+
+.table_scroll th.th_sorted {
+    color: var(--pc-blue-text);
+}
+
+/* each row is a paper strip */
+.table_scroll tbody tr {
+    cursor: pointer;
+}
+
+.table_scroll tbody td {
+    height: 64px;
+    padding: 0 12px;
+    color: var(--pc-paper-text);
+    background-color: var(--pc-paper);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 19px,
+        var(--pc-paper-line) 19px, var(--pc-paper-line) 20px
+    );
+    transition: background-color 0.1s ease;
+}
+
+.table_scroll tbody tr:hover td {
+    background-color: #d3cbb8;
+}
+
+/* dark sprite block slanting into the row */
+.table_scroll td.row_sprite_cell {
+    width: 96px;
+    padding: 0;
+}
+
+.row_sprite {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 64px;
+    padding-right: 14px;
+    box-sizing: border-box;
+    background: var(--pc-panel-2);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+.row_sprite img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+.row_name {
+    font-size: 18px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.row_types {
+    white-space: nowrap;
+}
+
+/* official labels are 200x40 (5:1): set the height, let the width follow */
+.type_icon {
+    height: 24px;
+    width: auto;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.row_stat {
+    text-align: right;
+    font-family: var(--pc-font-mono);
+    font-size: 16px;
+}
+
+.row_stat_sorted {
+    font-weight: 500;
+    color: #1f5ea8;
+}
+
+.table_scroll tbody td:last-child {
+    padding-right: 20px;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 640px) {
+    .pokemon_browser {
+        padding: 18px 16px 20px;
+    }
+
+    .browser_title {
+        font-size: 20px;
+    }
+}

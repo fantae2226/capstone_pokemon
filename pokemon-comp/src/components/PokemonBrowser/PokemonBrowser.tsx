@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { PokemonSummary } from "@/types/pokemon";
-import Modal from "@/components/Modal/Modal";
 import './PokemonBrowser.css';
 
 interface PokemonBrowserProps {
@@ -28,6 +27,18 @@ interface Filters {
 }
 
 type FilterSection = 'ability' | 'moves' | 'types';
+
+//Scarlet/Violet type labels from PokeAPI, looked up by PokeAPI's type id
+const TYPE_ICON_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-ix/scarlet-violet';
+const TYPE_IDS: Record<string, number> = {
+    normal: 1, fighting: 2, flying: 3, poison: 4, ground: 5, rock: 6,
+    bug: 7, ghost: 8, steel: 9, fire: 10, water: 11, grass: 12,
+    electric: 13, psychic: 14, ice: 15, dragon: 16, dark: 17, fairy: 18
+};
+
+function typeIcon(type: string){
+    return `${TYPE_ICON_URL}/${TYPE_IDS[type]}.png`;
+}
 
 export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners, onPick, onCancel } : PokemonBrowserProps){
     const ALL_TYPES = [
@@ -200,48 +211,67 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
     }
 
     return (
-        <div className="pokemon_browser">
-            <button onClick={onCancel}>Cancel</button>
-            
-            <button onClick={openFilterModal} disabled={loadingMoves}>Add Filter</button>
-            <input 
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Search for a pokemon..."
-                autoFocus
-            />
+        <div className="pokemon_browser pc-cut">
+            <div className="browser_header">
+                <h2 className="browser_title pc-pixel">CHOOSE POKÉMON</h2>
+                <button className="pc-btn browser_cancel" onClick={onCancel}>Cancel</button>
+            </div>
+
+            <div className="browser_toolbar">
+                <input 
+                    className="browser_search"
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    placeholder="Search for a pokemon..."
+                    autoFocus
+                />
+                <button
+                    className="browser_filter_btn"
+                    onClick={showFilterModal ? () => setShowFilterModal(false) : openFilterModal}
+                    disabled={loadingMoves}
+                    aria-expanded={showFilterModal}
+                >
+                    {showFilterModal ? 'Close Filters' : 'Add Filter'}
+                </button>
+                <span className="browser_count pc-mono">{rows.length} of {pokemon.length}</span>
+            </div>
+
             <div className="filter_chips">
                 {sort && (
-                    <span className="chip">
-                        {sort.key.toUpperCase()} {arrow(sort.key)}
-                        <button onClick={() => setSort(null)}>X</button>
+                    <span className="chip pc-paper">
+                        <span className="chip_label">SORT</span>
+                        <span className="chip_value">{sort.key.toUpperCase()} {arrow(sort.key)}</span>
+                        <button aria-label="Remove sort" onClick={() => setSort(null)}>×</button>
                     </span>
                 )}
                 {types.map(type => (
-                    <span key={type} className="chip">
-                        {type}
-                        <button onClick={() => toggleType(type)}>X</button>
+                    <span key={type} className="chip pc-paper">
+                        <span className="chip_label">TYPE</span>
+                        <span className="chip_value">{type}</span>
+                        <button aria-label={`Remove ${type} filter`} onClick={() => toggleType(type)}>×</button>
                     </span>
                 ))}
                 {ability && (
-                    <span className="chip">
-                        {ability.replace(/-/g, ' ')}
-                        <button onClick={removeAbility}>X</button>
+                    <span className="chip pc-paper">
+                        <span className="chip_label">ABILITY</span>
+                        <span className="chip_value">{ability.replace(/-/g, ' ')}</span>
+                        <button aria-label="Remove ability filter" onClick={removeAbility}>×</button>
                     </span>
                 )}
                 {moves.map(move => (
-                    <span key={`move-${move}`} className="chip">
-                        {move.replace(/-/g, ' ')}
-                        <button onClick={() => removeMove(move)}>X</button>
+                    <span key={`move-${move}`} className="chip pc-paper">
+                        <span className="chip_label">MOVE</span>
+                        <span className="chip_value">{move.replace(/-/g, ' ')}</span>
+                        <button aria-label={`Remove ${move} filter`} onClick={() => removeMove(move)}>×</button>
                     </span>
                 ))}
-                {loadingMoves && <span>Loading moves...</span>}
-                {(sort || types.length > 0 || ability || moves.length > 0) && <button onClick={resetFilters}>Reset Filters</button>}
+                {loadingMoves && <span className="browser_loading">Loading moves...</span>}
+                {(sort || types.length > 0 || ability || moves.length > 0) && <button className="reset_filters_btn" onClick={resetFilters}>Reset Filters</button>}
             </div>
 
 
             {showFilterModal && (
-                <Modal onClose={() => setShowFilterModal(false)}>
+                <div className="filter_panel">
                     <div className="filter_modal">
                         <div className="filter_sections">
                             <button
@@ -267,24 +297,31 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
 
                         <div className="filter_chips">
                             {draft.ability && (
-                                    <span className="chip">
-                                        {draft.ability.replace(/-/g, ' ')}
-                                        <button onClick={() => setDraft(prev => ({ ...prev, ability: null }))}>X</button>
+                                    <span className="chip pc-paper">
+                                        <span className="chip_label">ABILITY</span>
+                                        <span className="chip_value">{draft.ability.replace(/-/g, ' ')}</span>
+                                        <button aria-label="Remove ability" onClick={() => setDraft(prev => ({ ...prev, ability: null }))}>×</button>
                                     </span>
                             )}
                             {draft.moves.map(m => (
-                                        <span key={m} className="chip">
-                                            {m.replace(/-/g, ' ')}
-                                            <button onClick={() => removeDraftMove(m)}>X</button>
+                                        <span key={m} className="chip pc-paper">
+                                            <span className="chip_label">MOVE</span>
+                                            <span className="chip_value">{m.replace(/-/g, ' ')}</span>
+                                            <button aria-label={`Remove ${m}`} onClick={() => removeDraftMove(m)}>×</button>
                                         </span>
                             ))}
                             {draft.types.map(t => (
-                                <span key={`type-${t}`} className="chip">
-                                    {t}
-                                    <button onClick={() => toggleDraftType(t)}>X</button>
+                                <span key={`type-${t}`} className="chip pc-paper">
+                                    <span className="chip_label">TYPE</span>
+                                    <span className="chip_value">{t}</span>
+                                    <button aria-label={`Remove ${t}`} onClick={() => toggleDraftType(t)}>×</button>
                                 </span>
                             ))}
                         </div>
+
+                        {section === null && (
+                            <p className="filter_hint">Pick Ability, Moves, or Types to add a filter.</p>
+                        )}
 
                         {section === 'ability' && (
                             <div className="filter_section">
@@ -332,29 +369,29 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
                                         disabled={!draft.types.includes(t) && draft.types.length >= MAX_TYPES}
                                         onClick={() => toggleDraftType(t)}
                                     >
-                                        {t}
+                                        <img src={typeIcon(t)} alt={t} />
                                     </button>
                                 ))}
                             </div>
                         )}
 
                         <div className="filter_actions">
-                            <button onClick={() => setShowFilterModal(false)}>Cancel</button>
-                            <button onClick={applyDraft}>Apply</button>
+                            <button className="pc-btn" onClick={() => setShowFilterModal(false)}>Cancel</button>
+                            <button className="pc-btn pc-btn-primary" onClick={applyDraft}>Apply</button>
                         </div>
 
                     </div>
-                </Modal>
+                </div>
             )}
             <div className="table_scroll">
                 <table>
                     <thead>
                         <tr>
                             <th></th>
-                            <th onClick={() => clickSort('name')}>Name {arrow('name')}</th>
+                            <th className={sort?.key === 'name' ? 'th_sorted' : ''} onClick={() => clickSort('name')}>Name {arrow('name')}</th>
                             <th>Types</th>
                             {STAT_KEYS.map(k => (
-                                <th key={k} onClick={() => clickSort(k)}>
+                                <th key={k} className={sort?.key === k ? 'th_sorted th_stat' : 'th_stat'} onClick={() => clickSort(k)}>
                                     {k.toUpperCase()}
                                     {arrow(k)}
                                 </th>
@@ -364,18 +401,24 @@ export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners,
                     <tbody>
                         {rows.map(p => (
                             <tr key={p.id} onClick={() => onPick(p.name)}>
-                                <td>
-                                    <img 
-                                        src={p.spriteUrl} 
-                                        alt={p.name}
-                                        loading="lazy"
-                                        width={48}
-                                        height={48} 
-                                    />
+                                <td className="row_sprite_cell">
+                                    <span className="row_sprite">
+                                        <img 
+                                            src={p.spriteUrl} 
+                                            alt={p.name}
+                                            loading="lazy"
+                                            width={56}
+                                            height={56} 
+                                        />
+                                    </span>
                                 </td>
-                                <td>{p.name.replace(/-/g, ' ')}</td>
-                                <td>{p.types.join(' / ')}</td>
-                                {STAT_KEYS.map(k => <td key={k}>{p.baseStats[k]}</td>)}
+                                <td className="row_name">{p.name.replace(/-/g, ' ')}</td>
+                                <td className="row_types">
+                                    {p.types.map(t => (
+                                        <img key={t} className="type_icon" src={typeIcon(t)} alt={t} loading="lazy" />
+                                    ))}
+                                </td>
+                                {STAT_KEYS.map(k => <td key={k} className={sort?.key === k ? 'row_stat row_stat_sorted' : 'row_stat'}>{p.baseStats[k]}</td>)}
                             </tr>
                         ))}
                     </tbody>
