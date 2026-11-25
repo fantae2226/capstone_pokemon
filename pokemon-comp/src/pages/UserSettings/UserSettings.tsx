@@ -5,10 +5,7 @@ import supabase from '@/lib/supabase';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
-// import PokeTeamContainer from '../../components/EditTeams/PokeTeamContainer';
-
-import User from '../../assets/User.png';
-import Edit from '../../assets/Edit.png';
+import Navbar from '../Dashboard/Navbar';
 
 import './UserSettings.css'
 import { validateEmail, validatePassword } from '@/lib/validation';
@@ -39,10 +36,6 @@ export default function UserSettings(){
         confirmPassword: "",
         currentPassword: ""
     });
-
-    type Tab = "user_profile" | "pokemon_teams" | "import_team";
-    const [tab, setTab] = useState<Tab>("user_profile");
-
 
     useEffect(() => {
         if(!userId){
@@ -167,9 +160,7 @@ export default function UserSettings(){
 
     }
 
-    async function importTeam(e: React.FormEvent) {
-        e.preventDefault();
-    }
+
 
 
 
@@ -177,147 +168,132 @@ export default function UserSettings(){
         <div className='relative min-h-screen'>
             <HexagonBackground className='fixed inset-0'/>
             <div className='relative'>
-               <div className='user_settings_nav'>
-                    <button className='return_btn'
-                        onClick={() => navigate("/dashboard")}
-                    >
-                        ⇐
-                    </button>
-                    <button className='manage_userprofile'
-                        onClick={() => setTab("user_profile")}
-                    >
-                        Manage User Profile
-                    </button>
-                    <button className='manage_teams'
-                        onClick={() => setTab("pokemon_teams")}
-                    >
-                        Manage Pokemon Teams
-                    </button>
-                    <button className='import_teamdata'
-                        onClick={() => setTab("import_team")}
-                    >
-                        Import New Team
-                    </button>
-                    <button className='logout_btn'
-                            onClick={() => supabase.auth.signOut()}
-                    >
-                        Logout
-                    </button>
-               </div>
+                <Navbar />
 
-                <div className='settings_container'>
-                    {tab === "user_profile" && 
-                        <div className='account_info_container'> 
-                            <div className='account_info_header'> 
-                                <img className='user_icon' src={User} />
-                                <p>Account Information</p>
-                                <button 
+                <main className='settings_page'>
+                    <div className='settings_top'>
+                        <button className='return_btn' onClick={() => navigate("/dashboard")}>
+                            ← Dashboard
+                        </button>
+                        <button className='logout_btn' onClick={() => supabase.auth.signOut()}>
+                            Logout
+                        </button>
+                    </div>
+
+                    <div className='settings_frame'>
+                        <section className='settings_screen pc-cut'>
+
+                            {/* ---------- profile ---------- */}
+                            <div className='account_info_header'>
+                                <div>
+                                    <div className='settings_label pc-pixel'>SETTINGS</div>
+                                    <h1 className='settings_heading'>Account Information</h1>
+                                </div>
+                                <button
                                     className='edit_account_info_btn'
-                                    onClick={() => { 
+                                    onClick={() => {
                                         if(isEditing) setForm(savedForm);
                                         setIsEditing(!isEditing);}}
                                 >
-                                    <img className='edit_icon' src={Edit}/>
-                                    <p>{isEditing ? "Cancel" : "Edit"}</p>
+                                    {isEditing ? "Cancel" : "Edit"}
                                 </button>
                             </div>
+
                             <form className='user_info_form' onSubmit={editUserProfile}>
+                                <div className='pc-label-row pc-paper settings_row'>
+                                    <label htmlFor='username' className='pc-label'>Username</label>
+                                    <span className='pc-value'>
+                                        <input
+                                            type="text"
+                                            id='username'
+                                            placeholder='Username'
+                                            className='settings_row_input'
+                                            value={form.username}
+                                            onChange={handleUserFormChange}
+                                            readOnly={!isEditing}
+                                        />
+                                    </span>
+                                </div>
 
-                                <label htmlFor='username' className='username_input_label'>Username: </label>
-                                <input 
-                                    type="text"
-                                    id='username' 
-                                    placeholder='Username' 
-                                    className='username_input'
-                                    value={form.username}
-                                    onChange={handleUserFormChange}
-                                    readOnly={!isEditing}
-                                />
-                                
-                                <label htmlFor='email' className='email_input_label'>Email: </label>
-                                <input 
-                                    type="email"
-                                    id='email' 
-                                    placeholder='Email' 
-                                    className='email_input'
-                                    value={form.email}
-                                    readOnly
-                                />
+                                <div className='pc-label-row pc-paper settings_row'>
+                                    <label htmlFor='email' className='pc-label'>Email</label>
+                                    <span className='pc-value'>
+                                        <input
+                                            type="email"
+                                            id='email'
+                                            placeholder='Email'
+                                            className='settings_row_input'
+                                            value={form.email}
+                                            readOnly
+                                        />
+                                    </span>
+                                </div>
 
-                                {isEditing && <button type="submit" className='save_btn'>Save</button>}
-                                {error && <p className='error'>{error}</p>}
-                                {message && <p className='success'>{message}</p>}
+                                {(isEditing || error || message) && (
+                                    <div className='settings_form_footer'>
+                                        {isEditing && <button type="submit" className='settings_save_btn pc-btn pc-btn-primary'>Save</button>}
+                                        {error && <p className='settings_error'>{error}</p>}
+                                        {message && <p className='settings_success'>{message}</p>}
+                                    </div>
+                                )}
                             </form>
 
-                            <button
-                                type="button"
-                                className='security_toggle_btn'
-                                onClick={() => {
-                                    setShowSecurity(!showSecurity);
-                                    setSecError(null);
-                                    setSecForm({ newEmail: "", newPassword: "", confirmPassword: "", currentPassword: "" });
-                                }}
-                            >
-                                {showSecurity ? "Cancel" : "Change Email or Password"}
-                            </button>
+                            {/* ---------- email and password ---------- */}
+                            <div className='security_section'>
+                                <div className='security_header'>
+                                    <div>
+                                        <h2 className='settings_subheading'>Email and password</h2>
+                                        <p className='settings_note'>You'll be logged out after updating, so you can sign in with the new details.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className='security_toggle_btn'
+                                        onClick={() => {
+                                            setShowSecurity(!showSecurity);
+                                            setSecError(null);
+                                            setSecForm({ newEmail: "", newPassword: "", confirmPassword: "", currentPassword: "" });
+                                        }}
+                                    >
+                                        {showSecurity ? "Cancel" : "Change Email or Password"}
+                                    </button>
+                                </div>
 
-                            {showSecurity && (
-                                <form className='user_info_form security_form' onSubmit={chagneCredentials}>
-                                    <label htmlFor='newEmail'>New Email: </label>
-                                    <input type="email" id='newEmail' placeholder='Leave blank to keep current'
-                                        value={secForm.newEmail} onChange={handleSecFormChange} />
+                                {showSecurity && (
+                                    <form className='security_form' onSubmit={chagneCredentials}>
+                                        <label htmlFor='newEmail' className='security_field security_field_full'>New Email
+                                            <input type="email" id='newEmail' placeholder='Leave blank to keep current'
+                                                value={secForm.newEmail} onChange={handleSecFormChange} />
+                                        </label>
 
-                                    <label htmlFor='newPassword'>New Password: </label>
-                                    <input type="password" id='newPassword' placeholder='Leave blank to keep current'
-                                        autoComplete="new-password"
-                                        value={secForm.newPassword} onChange={handleSecFormChange} />
+                                        <label htmlFor='newPassword' className='security_field'>New Password
+                                            <input type="password" id='newPassword' placeholder='Leave blank to keep current'
+                                                autoComplete="new-password"
+                                                value={secForm.newPassword} onChange={handleSecFormChange} />
+                                        </label>
 
-                                    <label htmlFor='confirmPassword'>Confirm Password: </label>
-                                    <input type="password" id='confirmPassword' autoComplete="new-password"
-                                        value={secForm.confirmPassword} onChange={handleSecFormChange} />
+                                        <label htmlFor='confirmPassword' className='security_field'>Confirm Password
+                                            <input type="password" id='confirmPassword' placeholder='Repeat the new password'
+                                                autoComplete="new-password"
+                                                value={secForm.confirmPassword} onChange={handleSecFormChange} />
+                                        </label>
 
-                                    <label htmlFor='currentPassword'>Current Password: </label>
-                                    <input type="password" id='currentPassword' autoComplete="current-password"
-                                        value={secForm.currentPassword} onChange={handleSecFormChange} />
+                                        <div className='security_confirm'>
+                                            <label htmlFor='currentPassword' className='security_field'>Current Password
+                                                <input type="password" id='currentPassword' placeholder='Required to save changes'
+                                                    autoComplete="current-password"
+                                                    value={secForm.currentPassword} onChange={handleSecFormChange} />
+                                            </label>
+                                            <button type="submit" className='settings_save_btn pc-btn pc-btn-primary'>Update</button>
+                                        </div>
 
-                                    <button type="submit" className='save_btn'>Update</button>
-                                    {secError && <p className='error'>{secError}</p>}
+                                        {secError && <p className='settings_error security_field_full'>{secError}</p>}
+                                    </form>
+                                )}
+                            </div>
 
-                                </form>
-                            )}
-                            
-                        </div>
-                    }
-
-                    {tab === "pokemon_teams" && 
-                        <div className="pokemon_teams_container">
-                            <p>Last Edited Teams</p>
-                            <div className="poke_team_container">A</div>
-                            <div className="poke_team_container">B</div>
-                            <div className="poke_team_container">C</div>
-                            {/* <PokeTeamContainer 
-                                title='Trick Room'
-                                last_modified={new Date("2026-09-16")} /> */}
-                        </div>
-                    }
-                    
-                    {tab === "import_team" && 
-                        <div className="import_teams_container">
-                            <p>Insert your Team import code here</p>
-                            <form className='import_form' onSubmit={importTeam}>
-                                <label htmlFor='import' className='import_input_label'>Import Code: </label>
-                                <input 
-                                    type= "number"
-                                    id='import' 
-                                    placeholder='Import' 
-                                    className='import_input'
-                                    value="000928925"
-                                />
-                            </form>
-                        </div>
-                    }
-                </div>
-
+                        </section>
+                    </div>
+                </main>
             </div>
         </div>
     )

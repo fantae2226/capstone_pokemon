@@ -1,6 +1,6 @@
 import { HexagonBackground } from "@/components/animate-ui/components/backgrounds/hexagon"
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import pokeball from '../../assets/Pokeball.png';
 import type { TeamPokemon } from "@/types/pokemon";
 import PokemonEditor from "@/components/PokemonEditor/PokemonEditor";
@@ -9,6 +9,7 @@ import Modal from "@/components/Modal/Modal";
 import PokemonBrowser from "@/components/PokemonBrowser/PokemonBrowser";
 import type { PokemonSummary } from "@/types/pokemon";
 import './TeamViewer.css';
+import Navbar from "../Dashboard/Navbar";
 import supabase from "@/lib/supabase";
 import axios from "axios";
 
@@ -367,39 +368,60 @@ export default function TeamViewer(){
     // const selectedPokemon = selected !== null ? team[selected] : null;
 
 
+    const navigate = useNavigate();
+
     return(
         <div className="relative min-h-screen">
             <HexagonBackground className='fixed inset-0'/>
             <div className="relative">
-                <div className="team_viewer">
-                    <input 
-                        type="text" 
-                        className="team_name_input"
-                        value={teamName}
-                        onChange={e => setTeamName(e.target.value)}
-                        placeholder="Team Name" 
-                    />
-                    <button className="save_btn" onClick={handleSave} disabled={saving}>
-                        {saving ? 'Saving...' : 'Save Team'}
+                <Navbar />
+                <main className="team_viewer">
+                    <button className="team_viewer_back" onClick={() => navigate('/browse-teams')}>
+                        ← Your teams
                     </button>
-                    {status && <span>{status}</span>}
+
+                    <div className="team_viewer_header">
+                        <label className="team_name_field">
+                            <span className="team_name_label pc-pixel">TEAM NAME</span>
+                            <input 
+                                type="text" 
+                                className="team_name_input"
+                                value={teamName}
+                                onChange={e => setTeamName(e.target.value)}
+                                placeholder="Team Name" 
+                            />
+                        </label>
+                        <div className="team_viewer_actions">
+                            {status && <span className="team_viewer_status">{status}</span>}
+                            <button className="save_btn pc-btn pc-btn-primary" onClick={handleSave} disabled={saving}>
+                                {saving ? 'Saving...' : 'Save Team'}
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="team_viewer_slots">
                         {team.map((p, i) => (
                             <div
                                 key={i}
-                                className={`team_slot ${selected === i ? 'team_slot_selected' : ''}`}
+                                className={`team_slot pc-cut ${p ? 'team_slot_filled pc-paper' : 'team_slot_empty'} ${selected === i ? 'team_slot_selected' : ''}`}
 
                                 // temporary guard, will be lifted later to lead to pokemon customizer
                                 onClick={() => p && openEditor(i, p)}
                             >
-                                <img src={p ? p.spriteUrl : pokeball} alt={p ? p.name : 'Empty team slot'} />
+                                <div className="team_slot_top">
+                                    <span className="team_slot_number pc-pixel">SLOT {i + 1}</span>
+                                    <img src={p ? p.spriteUrl : pokeball} alt={p ? p.name : 'Empty team slot'} />
+                                </div>
 
                                 {p ? (
-                                    <button onClick={e => {e.stopPropagation(); handleDelete(i);} }>
-                                        Delete
-                                    </button>
+                                    <>
+                                        <span className="team_slot_name">{p.name.replace(/-/g, ' ')}</span>
+                                        <button className="team_slot_delete" onClick={e => {e.stopPropagation(); handleDelete(i);} }>
+                                            Delete
+                                        </button>
+                                    </>
                                 ) : (
-                                    <button onClick={() => handleAdd(i)}>
+                                    <button className="team_slot_add" onClick={() => handleAdd(i)}>
                                         Add
                                     </button>
                                 )}
@@ -427,13 +449,14 @@ export default function TeamViewer(){
                                 onChange={changes => setDraft(prev => (prev ? withSprite({...prev, ...changes}) : prev))}
                                 itemOptions={allItemNames}
                             />
-                            <button onClick={saveEditor}>Save</button>
-                            <button onClick={closeEditor}>Cancel</button>
+                            <div className="editor_actions">
+                                <button className="pc-btn" onClick={closeEditor}>Cancel</button>
+                                <button className="pc-btn pc-btn-primary" onClick={saveEditor}>Save</button>
+                            </div>
                         </Modal>
                     )}
 
-
-                </div>
+                </main>
             </div>
         </div>
     )

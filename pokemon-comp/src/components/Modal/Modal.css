@@ -1,18 +1,35 @@
 .modal-overlay {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  padding: 24px;
+  box-sizing: border-box;
+  background-color: rgba(5, 7, 11, 0.78);
 }
 
+/* the DS "frame" around whatever the popup shows (editor or browser) */
 .modal-box {
-  background-color: #ffffff;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
+  width: 100%;
+  max-width: 1480px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 16px;
+  background-color: var(--pc-frame);
+  border-radius: 18px;
+  color: var(--pc-text);
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .modal-box {
+    max-height: calc(100vh - 16px);
+    padding: 10px;
+  }
 }

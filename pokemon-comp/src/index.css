@@ -157,6 +157,12 @@
   --pc-font-mono: 'JetBrains Mono', monospace;
 }
 
+/* make the browser draw its built-in controls (dropdowns, checkboxes,
+   number spinners, scrollbars) in their dark version */
+html.dark {
+  color-scheme: dark;
+}
+
 /* shapes */
 .pc-cut {
   clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);

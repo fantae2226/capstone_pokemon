@@ -31,33 +31,30 @@ function renderSettings() {
 }
 
 describe('UserSettings - page', () => {
-    it('renders the background and every nav button', () => {
+    it('renders the background, the return button and the logout button', () => {
         renderSettings();
 
         expect(screen.getByTestId('hexagon-background')).toBeTruthy();
-        expect(screen.getByRole('button', { name: '⇐' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Manage User Profile' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Manage Pokemon Teams' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Import New Team' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: '← Dashboard' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Logout' })).toBeTruthy();
     });
 
     it('links the return arrow to /dashboard', () => {
         renderSettings();
 
-        fireEvent.click(screen.getByRole('button', { name: '⇐' }));
+        fireEvent.click(screen.getByRole('button', { name: '← Dashboard' }));
 
         expect(screen.getByText('Dashboard Page')).toBeTruthy();
     });
 });
 
-describe('UserSettings - profile tab', () => {
-    it('is the default tab and shows the account fields as read-only', () => {
+describe('UserSettings - profile', () => {
+    it('shows the account fields as read-only', () => {
         renderSettings();
 
         expect(screen.getByText('Account Information')).toBeTruthy();
-        expect((screen.getByLabelText('Username:') as HTMLInputElement).readOnly).toBe(true);
-        expect((screen.getByLabelText('Email:') as HTMLInputElement).readOnly).toBe(true);
+        expect((screen.getByLabelText('Username') as HTMLInputElement).readOnly).toBe(true);
+        expect((screen.getByLabelText('Email') as HTMLInputElement).readOnly).toBe(true);
         expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
     });
 
@@ -72,7 +69,7 @@ describe('UserSettings - profile tab', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
         expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy();
-        expect((screen.getByLabelText('Username:') as HTMLInputElement).readOnly).toBe(false);
+        expect((screen.getByLabelText('Username') as HTMLInputElement).readOnly).toBe(false);
 
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
         expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
@@ -82,7 +79,7 @@ describe('UserSettings - profile tab', () => {
     it('holds a typed username and reverts it on Cancel', () => {
         renderSettings();
         fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-        const input = screen.getByLabelText('Username:') as HTMLInputElement;
+        const input = screen.getByLabelText('Username') as HTMLInputElement;
 
         fireEvent.change(input, { target: { value: 'misty' } });
         expect(input.value).toBe('misty');
@@ -95,59 +92,29 @@ describe('UserSettings - profile tab', () => {
         renderSettings();
         fireEvent.click(screen.getByRole('button', { name: 'Change Email or Password' }));
 
-        fireEvent.change(screen.getByLabelText('New Email:'), { target: { value: 'new@example.com' } });
-        fireEvent.change(screen.getByLabelText('New Password:'), { target: { value: 'Newpass1!' } });
-        expect((screen.getByLabelText('New Email:') as HTMLInputElement).value).toBe('new@example.com');
-        expect((screen.getByLabelText('New Password:') as HTMLInputElement).value).toBe('Newpass1!');
+        fireEvent.change(screen.getByLabelText('New Email'), { target: { value: 'new@example.com' } });
+        fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'Newpass1!' } });
+        expect((screen.getByLabelText('New Email') as HTMLInputElement).value).toBe('new@example.com');
+        expect((screen.getByLabelText('New Password') as HTMLInputElement).value).toBe('Newpass1!');
 
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
         fireEvent.click(screen.getByRole('button', { name: 'Change Email or Password' }));
-        expect((screen.getByLabelText('New Email:') as HTMLInputElement).value).toBe('');
-        expect((screen.getByLabelText('New Password:') as HTMLInputElement).value).toBe('');
+        expect((screen.getByLabelText('New Email') as HTMLInputElement).value).toBe('');
+        expect((screen.getByLabelText('New Password') as HTMLInputElement).value).toBe('');
     });
 
     it('shows and hides the email/password form with the toggle button', () => {
         renderSettings();
-        expect(screen.queryByLabelText('New Email:')).toBeNull();
+        expect(screen.queryByLabelText('New Email')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: 'Change Email or Password' }));
-        expect(screen.getByLabelText('New Email:')).toBeTruthy();
-        expect(screen.getByLabelText('New Password:')).toBeTruthy();
-        expect(screen.getByLabelText('Confirm Password:')).toBeTruthy();
-        expect(screen.getByLabelText('Current Password:')).toBeTruthy();
+        expect(screen.getByLabelText('New Email')).toBeTruthy();
+        expect(screen.getByLabelText('New Password')).toBeTruthy();
+        expect(screen.getByLabelText('Confirm Password')).toBeTruthy();
+        expect(screen.getByLabelText('Current Password')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Update' })).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-        expect(screen.queryByLabelText('New Email:')).toBeNull();
-    });
-});
-
-describe('UserSettings - other tabs', () => {
-    it('shows the Pokemon teams tab and hides the profile tab', () => {
-        renderSettings();
-
-        fireEvent.click(screen.getByRole('button', { name: 'Manage Pokemon Teams' }));
-
-        expect(screen.getByText('Last Edited Teams')).toBeTruthy();
-        expect(screen.queryByText('Account Information')).toBeNull();
-    });
-
-    it('shows the import tab with its input', () => {
-        renderSettings();
-
-        fireEvent.click(screen.getByRole('button', { name: 'Import New Team' }));
-
-        expect(screen.getByText('Insert your Team import code here')).toBeTruthy();
-        expect(screen.getByLabelText('Import Code:')).toBeTruthy();
-        expect(screen.queryByText('Account Information')).toBeNull();
-    });
-
-    it('switches back to the profile tab', () => {
-        renderSettings();
-        fireEvent.click(screen.getByRole('button', { name: 'Import New Team' }));
-
-        fireEvent.click(screen.getByRole('button', { name: 'Manage User Profile' }));
-
-        expect(screen.getByText('Account Information')).toBeTruthy();
+        expect(screen.queryByLabelText('New Email')).toBeNull();
     });
 });

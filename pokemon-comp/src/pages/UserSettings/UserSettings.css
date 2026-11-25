@@ -1,347 +1,305 @@
 /* ==========================================================================
    UserSettings.css
-   Styling for the User Settings page (profile, teams, import)
+   Profile and email/password settings
    ========================================================================== */
 
-:root {
-  --settings-bg: rgba(17, 20, 28, 0.72);
-  --settings-border: rgba(255, 255, 255, 0.08);
-  --settings-surface: rgba(80, 21, 163, 0.692);
-  --settings-surface-hover: rgba(255, 255, 255, 0.08);
-  --settings-accent: #6c8cff;
-  --settings-accent-hover: #5577f0;
-  --settings-text: #f2f3f7;
-  --settings-text-muted: #9aa0ae;
-  --settings-radius: 14px;
-  --settings-radius-sm: 8px;
-  --settings-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-}
+/* ---------- page layout ---------- */
 
-/* ---------- Layout ---------- */
-
-.user_settings_nav {
+.settings_page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings_top {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  background: var(--settings-bg);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--settings-border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.user_settings_nav button {
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--settings-text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--settings-radius-sm);
-  padding: 0.55rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.user_settings_nav button:hover {
-  background: var(--settings-surface-hover);
-  color: var(--settings-text);
+  gap: 16px;
 }
 
 .return_btn {
-  font-size: 1.1rem !important;
-  padding: 0.5rem 0.75rem !important;
-  margin-right: 0.5rem;
+  height: 48px;
+  padding: 0 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  color: var(--pc-blue-text);
+}
+
+.return_btn:hover {
+  color: #8cc0f4;
 }
 
 .logout_btn {
-  margin-left: auto;
-  color: #ff8080 !important;
+  height: 48px;
+  padding: 0 22px;
+  background: transparent;
+  border: 1px solid var(--pc-line);
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--pc-text);
 }
 
 .logout_btn:hover {
-  background: rgba(255, 90, 90, 0.12) !important;
-  color: #ff9d9d !important;
+  background: var(--pc-panel-2);
 }
 
-.settings_container {
-  max-width: 720px;
-  margin: 3rem auto;
-  padding: 0 1.5rem;
+/* DS frame around the single screen */
+.settings_frame {
+  padding: 16px;
+  background: var(--pc-frame);
+  border-radius: 18px;
 }
 
-/* ---------- Shared card look ---------- */
-
-.account_info_container,
-.pokemon_teams_container,
-.import_teams_container {
-  background: var(--settings-surface);
-  border: 1px solid var(--settings-border);
-  border-radius: var(--settings-radius);
-  box-shadow: var(--settings-shadow);
-  padding: 2rem;
-  color: var(--settings-text);
-}
-
-/* ---------- Account info tab ---------- */
-
-.account_info_header {
+.settings_screen {
+  padding: 40px;
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  margin-bottom: 1.75rem;
+  flex-direction: column;
+  gap: 28px;
+  background: var(--pc-bg);
+  border-top: 4px solid var(--pc-blue);
+  color: var(--pc-text);
 }
 
-.account_info_header .user_icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid var(--settings-border);
-}
+/* ---------- headings ---------- */
 
-.account_info_header p {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin: 0;
-  flex: 1;
-}
-
-.edit_account_info_btn {
+.account_info_header,
+.security_header {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: transparent;
-  border: 1px solid var(--settings-border);
-  border-radius: var(--settings-radius-sm);
-  padding: 0.4rem 0.85rem;
-  color: var(--settings-text-muted);
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
-.edit_account_info_btn:hover {
-  background: var(--settings-surface-hover);
-  color: var(--settings-text);
+.settings_label {
+  font-size: 16px;
+  color: var(--pc-red-text);
 }
 
-.edit_account_info_btn .edit_icon {
-  width: 16px;
-  height: 16px;
+.settings_heading {
+  margin: 4px 0 0;
+  font-size: 32px;
+  font-weight: 500;
 }
 
-.edit_account_info_btn p {
+.settings_subheading {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 24px;
+  font-weight: 500;
 }
 
-.user_info_form {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  align-items: center;
-  row-gap: 1.1rem;
-  column-gap: 1rem;
+.settings_note {
+  margin: 6px 0 0;
+  font-size: 16px;
+  color: var(--pc-text-muted);
 }
 
-.user_info_form label {
-  font-size: 0.85rem;
-  color: var(--settings-text-muted);
-}
-
-.user_info_form input {
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: var(--settings-text);
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--settings-border);
-  border-radius: var(--settings-radius-sm);
-  padding: 0.6rem 0.85rem;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.user_info_form input:focus {
-  border-color: var(--settings-accent);
-  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.2);
-}
-
-.user_info_form input:disabled,
-.user_info_form input[readonly] {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* ---------- Save button + status messages ---------- */
-
-.save_btn {
-  grid-column: 1 / -1;
-  justify-self: end;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--settings-accent);
-  border: none;
-  border-radius: var(--settings-radius-sm);
-  padding: 0.6rem 1.5rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-}
-
-.save_btn:hover {
-  background: var(--settings-accent-hover);
-}
-
-.save_btn:active {
-  transform: translateY(1px);
-}
-
-.save_btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.35);
-}
-
-.save_btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.user_info_form .error,
-.user_info_form .success {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.875rem;
-  border-radius: var(--settings-radius-sm);
-  border: 1px solid;
-}
-
-.user_info_form .error {
-  color: #ffb4b4;
-  background: rgba(255, 90, 90, 0.12);
-  border-color: rgba(255, 90, 90, 0.35);
-}
-
-.user_info_form .success {
-  color: #a8f0c0;
-  background: rgba(80, 200, 120, 0.12);
-  border-color: rgba(80, 200, 120, 0.35);
-}
-
+.edit_account_info_btn,
 .security_toggle_btn {
-  margin-top: 1.75rem;
-  font-family: inherit;
-  font-size: 0.85rem;
-  color: var(--settings-text-muted);
-  background: transparent;
-  border: 1px solid var(--settings-border);
-  border-radius: var(--settings-radius-sm);
-  padding: 0.5rem 1rem;
+  height: 48px;
+  padding: 0 22px;
+  background: var(--pc-panel-2);
+  border: none;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  font-size: 16px;
+  color: #8cc0f4;
 }
 
+.edit_account_info_btn:hover,
 .security_toggle_btn:hover {
-  background: var(--settings-surface-hover);
-  color: var(--settings-text);
+  background: #24304a;
+}
+
+/* ---------- profile rows: dark label slanting into paper ---------- */
+
+/* the rows run to the screen edges, so they cancel the screen's 40px padding */
+.user_info_form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 -40px;
+}
+
+.settings_row {
+  min-height: 64px;
+}
+
+.settings_row .pc-label {
+  width: 180px;
+  padding-left: 40px;
+  font-size: 16px;
+}
+
+.settings_row .pc-value {
+  flex: 1;
+  padding-right: 40px;
+}
+
+/* read-only: looks like plain text on the paper */
+.settings_row_input {
+  width: 100%;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  font-size: 19px;
+  color: var(--pc-paper-text);
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.settings_row_input:read-only {
+  cursor: default;
+}
+
+.settings_row_input:read-only:focus {
+  outline: none;
+}
+
+/* editing: a light field with a blue border */
+.settings_row_input:not(:read-only) {
+  background: #f2ede2;
+  border-color: var(--pc-blue);
+}
+
+.settings_row_input:not(:read-only):focus {
+  outline: 2px solid var(--pc-blue);
+  outline-offset: 0;
+}
+
+.settings_form_footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 40px 0;
+}
+
+/* ---------- email and password ---------- */
+
+.security_section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 28px;
+  border-top: 1px solid var(--pc-panel-2);
 }
 
 .security_form {
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--settings-border);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
 }
 
-/* ---------- Pokemon teams tab ---------- */
-
-.pokemon_teams_container > p {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 1.25rem;
-}
-
-.poke_team_container {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--settings-border);
-  border-radius: var(--settings-radius-sm);
-  padding: 1rem 1.25rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
-  color: var(--settings-text-muted);
-  cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.poke_team_container:last-child {
-  margin-bottom: 0;
-}
-
-.poke_team_container:hover {
-  background: var(--settings-surface-hover);
-  border-color: var(--settings-accent);
-  color: var(--settings-text);
-}
-
-/* ---------- Import team tab ---------- */
-
-.import_teams_container > p {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 1.5rem;
-}
-
-.import_form {
+.security_field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--pc-text-muted);
 }
 
-.import_input_label {
-  font-size: 0.85rem;
-  color: var(--settings-text-muted);
+.security_field_full {
+  grid-column: 1 / -1;
 }
 
-.import_input {
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: var(--settings-text);
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--settings-border);
-  border-radius: var(--settings-radius-sm);
-  padding: 0.65rem 0.9rem;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.security_field input {
+  height: 56px;
+  box-sizing: border-box;
+  padding: 0 18px;
+  font-size: 18px;
+  color: var(--pc-text);
+  background: var(--pc-panel);
+  border: 1px solid var(--pc-line);
 }
 
-.import_input:focus {
-  border-color: var(--settings-accent);
-  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.2);
+.security_field input::placeholder {
+  color: #7d889b;
 }
 
-/* ---------- Responsive ---------- */
+.security_field input:focus {
+  outline: 2px solid var(--pc-blue);
+  outline-offset: 0;
+  border-color: var(--pc-blue);
+}
 
-@media (max-width: 640px) {
-  .user_settings_nav {
-    flex-wrap: wrap;
-    gap: 0.35rem;
+/* current password sits apart, next to the Update button */
+.security_confirm {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--pc-panel-2);
+}
+
+.security_confirm .security_field {
+  flex: 1 1 320px;
+}
+
+/* ---------- buttons and messages ---------- */
+
+.settings_save_btn {
+  height: 56px;
+  padding: 0 32px;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.settings_error {
+  margin: 0;
+  font-size: 16px;
+  color: var(--pc-red-text);
+}
+
+.settings_success {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 16px;
+  color: var(--pc-text);
+  background: #16233a;
+  border-left: 4px solid var(--pc-blue);
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 720px) {
+  .settings_page {
+    padding: 24px 12px 40px;
   }
 
-  .logout_btn {
-    margin-left: 0;
-  }
-
-  .settings_container {
-    margin: 1.5rem auto;
+  .settings_screen {
+    padding: 24px;
   }
 
   .user_info_form {
-    grid-template-columns: 1fr;
-    row-gap: 0.4rem;
+    margin: 0 -24px;
   }
 
-  .user_info_form label {
-    margin-top: 0.5rem;
+  .settings_row .pc-label {
+    width: 120px;
+    padding-left: 24px;
+  }
+
+  .settings_row .pc-value {
+    padding-right: 24px;
+  }
+
+  .settings_form_footer {
+    padding: 16px 24px 0;
+  }
+
+  .security_form {
+    grid-template-columns: 1fr;
+  }
+
+  .settings_heading {
+    font-size: 26px;
   }
 }
