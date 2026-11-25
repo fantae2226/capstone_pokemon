@@ -212,8 +212,35 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
     }
     return(
         <div className="pokemon_editor">
-            <div className="pokemon_editor_left">
-                <img className="pokemon_editor_sprite" src={pokemon.spriteUrl} alt={pokemon.name} />
+            <div className="pokemon_editor_left pc-cut">
+                <div className="editor_title">
+                    <span className="editor_name pc-pixel">{pokemon.name.replace(/-/g, ' ')}</span>
+                    <span className="editor_level pc-pixel">Lv.{pokemon.level}</span>
+                </div>
+
+                <div className="editor_sprite_wrap">
+                    <img className="pokemon_editor_sprite" src={pokemon.spriteUrl} alt={pokemon.name} />
+                </div>
+
+                <div className="editor_info">
+                    <div className="pc-label-row pc-paper">
+                        <span className="pc-label">Item</span>
+                        <span className="pc-value">{pokemon.item ? pokemon.item.replace(/-/g, ' ') : 'None'}</span>
+                    </div>
+                    <div className="pc-label-row pc-paper">
+                        <span className="pc-label">Ability</span>
+                        <span className="pc-value">{pokemon.ability ? pokemon.ability.replace(/-/g, ' ') : 'None'}</span>
+                    </div>
+                    <div className="pc-label-row pc-paper">
+                        <span className="pc-label">Nature</span>
+                        <span className="pc-value">
+                            {pokemon.nature}
+                            {nature?.up && <span className="editor_nature_up">{STAT_LABELS[nature.up]}</span>}
+                            {nature?.down && <span className="editor_nature_down">{STAT_LABELS[nature.down]}</span>}
+                        </span>
+                    </div>
+                </div>
+
                 <div className="pokemon_editor_stats">
                     {STAT_KEYS.map(stat => (
                         <StatRow 
@@ -228,7 +255,7 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                 </div>
             </div>
 
-            <Tabs defaultValue="moves" className="pokemon_editor_tabs">
+            <Tabs defaultValue="moves" className="pokemon_editor_tabs pc-cut">
                 <TabsList>
                     <TabsTrigger value="moves">Moves</TabsTrigger>
                     <TabsTrigger value="stats">Stats</TabsTrigger>
@@ -239,9 +266,15 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                 <TabsContent value="moves">
                     <div className="pokemon_editor_moves">
                         {pokemon.moves.map( (move, i) => (
-                            <div key={i} className="move_slot" onClick={() => { setEditingMove(i); setEditingItem(false); }}>
-                                {move ? move.replace(/-/g, ' ') : `Move ${i + 1}`}
-                            </div>
+                            <button
+                                key={i}
+                                type="button"
+                                className={`move_slot pc-label-row pc-paper ${editingMove === i ? 'slot_active' : ''}`}
+                                onClick={() => { setEditingMove(i); setEditingItem(false); }}
+                            >
+                                <span className="pc-label">Move {i + 1}</span>
+                                <span className="pc-value">{move ? move.replace(/-/g, ' ') : 'Choose a move'}</span>
+                            </button>
                         ))}
 
                         {editingMove !== null && (
@@ -253,9 +286,14 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             />
                         )}
 
-                        <div className="item_slot" onClick={() => {setEditingItem(true); setEditingMove(null);}}>
-                            {pokemon.item ? pokemon.item.replace(/-/g, ' ') : 'Item'}
-                        </div>
+                        <button
+                            type="button"
+                            className={`item_slot pc-label-row pc-paper ${editingItem ? 'slot_active' : ''}`}
+                            onClick={() => {setEditingItem(true); setEditingMove(null);}}
+                        >
+                            <span className="pc-label">Held item</span>
+                            <span className="pc-value">{pokemon.item ? pokemon.item.replace(/-/g, ' ') : 'Choose an item'}</span>
+                        </button>
 
                         {editingItem && (
                             <SearchPicker
@@ -278,8 +316,8 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             up={nature?.up ?? null}
                             down={nature?.down ?? null}
                         />
-                        <label className="detail_row">
-                            Nature
+                        <label className="detail_row pc-label-row pc-paper">
+                            <span className="pc-label">Nature</span>
                             <select 
                                 value={pokemon.nature}
                                 onChange={e => onChange({ nature: e.target.value })}
@@ -312,8 +350,8 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
 
                 <TabsContent value="details">
                     <div className="pokemon_editor_details">
-                        <label className="detail_row">
-                            Level
+                        <label className="detail_row pc-label-row pc-paper">
+                            <span className="pc-label">Level</span>
                             <input 
                                 type="number"
                                 min={1}
@@ -325,8 +363,8 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             />
                         </label>
 
-                        <label className="detail_row">
-                            Gender
+                        <label className="detail_row pc-label-row pc-paper">
+                            <span className="pc-label">Gender</span>
                             {pokemon.genderOptions.length === 0 ? (
                                 <span>Genderless</span>
                             ) : (
@@ -342,8 +380,8 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             )}
                         </label>
 
-                        <label className="detail_row">
-                            Shiny
+                        <label className="detail_row pc-label-row pc-paper">
+                            <span className="pc-label">Shiny</span>
                             <input 
                                 type="checkbox"
                                 checked={pokemon.shiny}
@@ -351,8 +389,8 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             />
                         </label>
 
-                        <label className="detail_row">
-                            Ability
+                        <label className="detail_row pc-label-row pc-paper">
+                            <span className="pc-label">Ability</span>
                             <select 
                                 value={pokemon.ability ?? ''}
                                 onChange={e => onChange({ ability: e.target.value })}

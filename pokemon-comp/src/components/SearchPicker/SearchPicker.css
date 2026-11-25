@@ -1,0 +1,81 @@
+/* move / item search, shown inside the editor's right screen */
+
+.search_picker {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 16px;
+    background: var(--pc-panel);
+    border-left: 4px solid var(--pc-blue);
+}
+
+.search_picker input {
+    height: 52px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    font-size: 18px;
+    color: var(--pc-text);
+    background: var(--pc-bg);
+    border: 1px solid var(--pc-line);
+}
+
+.search_picker input::placeholder {
+    color: #7d889b;
+}
+
+.search_picker input:focus {
+    outline: 2px solid var(--pc-blue);
+    outline-offset: 0;
+    border-color: var(--pc-blue);
+}
+
+/* the Cancel button next to the search box */
+.search_picker > button {
+    height: 52px;
+    padding: 0 20px;
+    font-size: 16px;
+    color: var(--pc-text);
+    background: var(--pc-panel-2);
+    border: none;
+    cursor: pointer;
+}
+
+.search_picker > button:hover {
+    background: #24304a;
+}
+
+/* results: paper rows with a slanted edge */
+.search_picker ul {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.search_picker li button {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 36px 0 16px;
+    text-align: left;
+    font-size: 17px;
+    text-transform: capitalize;
+    color: var(--pc-paper-text);
+    background-color: var(--pc-paper);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 19px,
+        var(--pc-paper-line) 19px, var(--pc-paper-line) 20px
+    );
+    border: none;
+    border-left: 4px solid #c4bba8;
+    cursor: pointer;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+.search_picker li button:hover {
+    background-color: #d3cbb8;
+    border-left-color: var(--pc-blue);
+}

@@ -1,7 +1,7 @@
-.stat_hexagon { width: 100%; max-width: 16rem; align-self: center; }
-.hex_ring { fill: none; stroke: #d4d4d8; stroke-width: 1; }
-.hex_untrained { fill: rgba(148, 163, 184, 0.3); stroke: #94a3b8; stroke-width: 1; }
-.hex_real { fill: rgba(16, 185, 129, 0.35); stroke: #10b981; stroke-width: 2; stroke-linejoin: round; }
-.hex_label { fill: #888; font-size: 11px; }
-.hex_label_up { fill: #3b82f6; font-weight: 600; }   /* nature raises this stat */
-.hex_label_down { fill: #ef4444; font-weight: 600; } /* nature lowers this stat */
+.stat_hexagon { width: 100%; max-width: 380px; align-self: center; }
+.hex_ring { fill: none; stroke: var(--pc-line); stroke-width: 1; }
+.hex_untrained { fill: rgba(169, 180, 198, 0.12); stroke: #5b6880; stroke-width: 1; stroke-dasharray: 4 3; } /* natural stats */
+.hex_real { fill: rgba(232, 244, 255, 0.18); stroke: var(--pc-text); stroke-width: 2; stroke-linejoin: round; } /* with evs + nature */
+.hex_label { fill: var(--pc-text-muted); font-size: 12px; font-family: var(--pc-font-mono); }
+.hex_label_up { fill: var(--pc-red-text); font-weight: 500; }   /* nature raises this stat */
+.hex_label_down { fill: var(--pc-blue-text); font-weight: 500; } /* nature lowers this stat */

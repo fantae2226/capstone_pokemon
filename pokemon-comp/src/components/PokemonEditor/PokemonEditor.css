@@ -1,19 +1,418 @@
-.pokemon_editor { display: grid; grid-template-columns: minmax(14rem, auto) 1fr; gap: 1rem; }
-.pokemon_editor_left { display: flex; flex-direction: column; align-items: center; }
-.pokemon_editor_stats { width: 100%; }
-.pokemon_editor_moves { display: flex; flex-direction: column; gap: 0.5rem; }
-.stat_row { display: grid; grid-template-columns: 2.5rem 2.5rem 1fr 2.5rem; align-items: center; gap: 0.5rem; }
-.stat_base { text-align: right; opacity: 0.7; }
-.stat_value { text-align: right; }
-.stat_label_up { color: #3b82f6; font-weight: 600; }   /* nature raises this stat */
-.stat_label_down { color: #ef4444; font-weight: 600; } /* nature lowers this stat */
-.stat_bar { background: #ddd; height: 0.5rem; }
-.stat_bar_fill { background: #4caf50; height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
-.pokemon_editor_tabs { min-width: 16rem; }
-.pokemon_editor_details { display: flex; flex-direction: column; gap: 0.75rem; }
-.detail_row { display: grid; grid-template-columns: 4rem 1fr; align-items: center; gap: 0.5rem; text-transform: capitalize; }
-.ev_row { display: grid; grid-template-columns: 2.5rem 1.75rem 1fr 1.75rem 3.5rem; align-items: center; gap: 0.4rem; }
-.ev_row button { border: 1px solid #ccc; border-radius: 0.25rem; }
-.ev_row button:disabled { opacity: 0.35; cursor: not-allowed; }
-.ev_number { width: 100%; text-align: right; }
-.ev_remaining { align-self: flex-end; font-size: 0.875rem; opacity: 0.8; }
+/* ==========================================================================
+   PokemonEditor.css
+   Unfolded DS layout: left screen = the Pokémon (red strip),
+   right screen = the controls (blue strip). Stacks on narrow screens.
+   ========================================================================== */
+
+.pokemon_editor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+/* ---------- the two screens ---------- */
+
+.pokemon_editor_left,
+.pokemon_editor_tabs {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 32px;
+    background: var(--pc-bg);
+    color: var(--pc-text);
+}
+
+.pokemon_editor_left {
+    flex: 1 1 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-top: 4px solid var(--pc-red);
+}
+
+.pokemon_editor_tabs {
+    flex: 1.3 1 560px;
+    gap: 20px;
+    border-top: 4px solid var(--pc-blue);
+}
+
+/* ---------- left screen: name, sprite, info ---------- */
+
+.editor_title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.editor_name {
+    font-size: 32px;
+    text-transform: uppercase;
+}
+
+.editor_level {
+    font-size: 20px;
+    color: var(--pc-text-muted);
+}
+
+/* sprite standing on an oval "platform" */
+.editor_sprite_wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 12px;
+}
+
+.editor_sprite_wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 220px;
+    height: 24px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--pc-panel-2);
+}
+
+.pokemon_editor_sprite {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 260px;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+
+/* paper rows run to the screen edges, so they cancel the screen's 32px padding */
+.editor_info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 -32px;
+}
+
+.editor_info .pc-label-row {
+    min-height: 48px;
+}
+
+.editor_info .pc-label {
+    width: 130px;
+    padding-left: 32px;
+    font-size: 15px;
+}
+
+.editor_info .pc-value {
+    font-size: 18px;
+    text-transform: capitalize;
+}
+
+.editor_nature_up,
+.editor_nature_down {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.editor_nature_up {
+    color: #b8323a;
+}
+
+.editor_nature_up::before {
+    content: '▲';
+}
+
+.editor_nature_down {
+    color: #1f5ea8;
+}
+
+.editor_nature_down::before {
+    content: '▼';
+}
+
+/* ---------- left screen: stat bars ---------- */
+
+.pokemon_editor_stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat_row {
+    display: grid;
+    grid-template-columns: 76px 44px 1fr 52px;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--pc-font-mono);
+    font-size: 16px;
+}
+
+.stat_label {
+    color: var(--pc-text-muted);
+}
+
+/* red ▲ = raised by nature, blue ▼ = lowered (same everywhere on the site) */
+.stat_label_up {
+    color: var(--pc-red-text);
+    font-weight: 500;
+}
+
+.stat_label_up::after {
+    content: ' ▲';
+}
+
+.stat_label_down {
+    color: var(--pc-blue-text);
+    font-weight: 500;
+}
+
+.stat_label_down::after {
+    content: ' ▼';
+}
+
+.stat_base {
+    text-align: right;
+    color: var(--pc-text-muted);
+}
+
+.stat_bar {
+    height: 12px;
+    background: var(--pc-panel-2);
+}
+
+.stat_bar_fill {
+    height: 100%;
+    transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+.stat_value {
+    text-align: right;
+    color: var(--pc-text);
+}
+
+/* ---------- right screen: tabs ---------- */
+
+/* hide animate-ui's sliding highlight box (same fix as the login page) */
+.pokemon_editor_tabs [data-slot="motion-highlight"] {
+    display: none;
+}
+
+.pokemon_editor_tabs [role="tablist"] {
+    width: fit-content;
+    height: auto;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+}
+
+.pokemon_editor_tabs [role="tab"] {
+    height: 52px;
+    padding: 0 26px;
+    font-family: var(--pc-font-pixel);
+    font-size: 17px;
+    text-transform: uppercase;
+    color: var(--pc-text-muted);
+    background: var(--pc-panel-2);
+    border-radius: 0;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.pokemon_editor_tabs [role="tab"][data-state="active"] {
+    color: #ffffff;
+    background: var(--pc-blue);
+}
+
+/* ---------- moves tab ---------- */
+
+.pokemon_editor_moves {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.move_slot,
+.item_slot {
+    width: 100%;
+    min-height: 60px;
+    padding: 0;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    transition: background-color 0.15s ease;
+}
+
+.item_slot {
+    margin-top: 12px;
+}
+
+.move_slot:hover,
+.item_slot:hover {
+    background-color: #d3cbb8;
+}
+
+/* the slot currently being searched */
+.slot_active {
+    outline: 3px solid var(--pc-blue);
+    outline-offset: -3px;
+}
+
+.move_slot .pc-label,
+.item_slot .pc-label {
+    width: 130px;
+    font-size: 15px;
+}
+
+.move_slot .pc-value,
+.item_slot .pc-value {
+    font-size: 19px;
+    text-transform: capitalize;
+}
+
+/* ---------- stats tab ---------- */
+
+.pokemon_editor_details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ev_row {
+    display: grid;
+    grid-template-columns: 64px 48px 1fr 48px 84px;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--pc-font-mono);
+    font-size: 16px;
+    color: var(--pc-text-muted);
+}
+
+.ev_row button {
+    height: 44px;
+    font-size: 20px;
+    color: var(--pc-text);
+    background: var(--pc-panel-2);
+    border: none;
+    cursor: pointer;
+}
+
+.ev_row button:hover:not(:disabled) {
+    background: #24304a;
+}
+
+.ev_row button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.ev_row input[type="range"] {
+    width: 100%;
+    accent-color: var(--pc-blue);
+}
+
+.ev_number {
+    width: 100%;
+    height: 44px;
+    box-sizing: border-box;
+    padding: 0 10px;
+    text-align: right;
+    font-family: var(--pc-font-mono);
+    font-size: 16px;
+    color: var(--pc-text);
+    background: var(--pc-panel);
+    border: 1px solid var(--pc-line);
+}
+
+.ev_remaining {
+    align-self: flex-end;
+    font-family: var(--pc-font-mono);
+    font-size: 16px;
+    color: var(--pc-text-muted);
+}
+
+/* ---------- paper rows with a control (nature, level, gender, shiny, ability) ---------- */
+
+.detail_row {
+    min-height: 60px;
+    text-transform: capitalize;
+}
+
+.detail_row .pc-label {
+    width: 130px;
+    font-size: 15px;
+}
+
+/* everything after the dark label: centred, with space from the slant */
+.detail_row > :not(.pc-label) {
+    align-self: center;
+    margin: 0 16px;
+}
+
+.detail_row select,
+.detail_row input[type="number"] {
+    flex: 1;
+    max-width: 360px;
+    height: 44px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    font-size: 17px;
+    text-transform: capitalize;
+    color: var(--pc-paper-text);
+    background: #f2ede2;
+    border: 1px solid #c4bba8;
+}
+
+.detail_row select:focus,
+.detail_row input[type="number"]:focus {
+    outline: 2px solid var(--pc-blue);
+    outline-offset: 0;
+}
+
+/* the open dropdown list stays dark and readable */
+.detail_row option,
+.detail_row optgroup {
+    color: var(--pc-text);
+    background: var(--pc-panel);
+}
+
+.detail_row input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    accent-color: var(--pc-blue);
+    cursor: pointer;
+}
+
+.detail_row > span:not(.pc-label) {
+    font-size: 17px;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 640px) {
+    .pokemon_editor_left,
+    .pokemon_editor_tabs {
+        padding: 20px;
+    }
+
+    .editor_info {
+        margin: 0 -20px;
+    }
+
+    .editor_info .pc-label {
+        padding-left: 20px;
+    }
+
+    .editor_name {
+        font-size: 24px;
+    }
+
+    .pokemon_editor_tabs [role="tab"] {
+        padding: 0 16px;
+        font-size: 14px;
+    }
+
+    .ev_row {
+        grid-template-columns: 48px 40px 1fr 40px 64px;
+        gap: 6px;
+    }
+}
