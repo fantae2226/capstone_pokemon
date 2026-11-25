@@ -115,6 +115,16 @@ describe("LoginSignup", () => {
             await userEvent.click(submitBtn);
             await waitFor(() => expect(mockNavigate).not.toHaveBeenCalled());
         });
+
+        test("shows the error message when login fails", async () => {
+            mockSignInWithPassword.mockResolvedValue({ data: null, error: { message: "Invalid login credentials" } });
+            render(<LoginSignup />);
+            const { email, password, submitBtn } = getLoginFields();
+            await userEvent.type(email, "wrong@pokemon.com");
+            await userEvent.type(password, "wrongpass");
+            await userEvent.click(submitBtn);
+            expect(await screen.findByRole("alert")).toHaveTextContent("Wrong email or password. Try again.");
+        });
     });
 
 

@@ -55,7 +55,7 @@ app.post('/signup', async (req, res) => {
         return res.status(400).json({ message: 'Signup failed', error: insertError.message });
     }
 
-    console.log('Signup attempt:', { username, email, password });
+    // console.log('Signup attempt:', { username, email, password });
     res.json({ message: 'Signup successful' });
 });
 

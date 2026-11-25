@@ -15,6 +15,7 @@ export default function LoginSignup() {
     const [inputError, setInputError] = useState({ email:'', password:'', confirmPassword:'' })
     const [tab, setTab] = useState('login');
     const [signupMessage, setSignupMessage] = useState('');
+    const [loginError, setLoginError] = useState('');
     // const navigate = useNavigate();
 
 
@@ -41,6 +42,7 @@ export default function LoginSignup() {
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
+        setLoginError('');
 
         const {data, error} = await supabase.auth.signInWithPassword({
             email: loginData.email,
@@ -49,6 +51,10 @@ export default function LoginSignup() {
 
         if (error) {
             console.error('Error logging in:', error);
+            setLoginError(error.message === 'Invalid login credentials'
+                    ? 'Wrong email or password. Try again.'
+                    : error.message
+            );
             return;
         }
 
@@ -137,6 +143,7 @@ export default function LoginSignup() {
                                         value={loginData.password}
                                         onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                                     />
+                                    {loginError && <p className="login-error" role="alert">{loginError}</p>}
                                     <button type="submit" className="login-submit-btn pc-btn pc-btn-primary">Login</button>
                                 </form>
                             </TabsContent>
