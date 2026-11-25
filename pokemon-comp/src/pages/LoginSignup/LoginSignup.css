@@ -11,14 +11,18 @@
 }
 
 /* pointer-events: none lets the hexagons behind react to the mouse;
-   the frame turns it back on so the forms still work */
+   the frame turns it back on so the forms still work.
+   min-height + align-items centres the frame vertically on tall screens */
 .login-content {
     position: relative;
     z-index: 10;
     pointer-events: none;
+    min-height: 100vh;
+    box-sizing: border-box;
     display: flex;
     justify-content: center;
-    padding: 64px 24px;
+    align-items: center;
+    padding: 48px 32px;
 }
 
 /* ---------- DS frame: two screens side by side, stacked on narrow screens ---------- */
@@ -26,20 +30,20 @@
 .login-frame {
     pointer-events: auto;
     width: 100%;
-    max-width: 1000px;
+    max-width: 1320px;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 12px;
+    gap: 14px;
+    padding: 16px;
     background: var(--pc-frame);
-    border-radius: 14px;
+    border-radius: 18px;
 }
 
 .login-screen {
-    flex: 1 1 380px;
+    flex: 1 1 460px;
     min-width: 0;
     box-sizing: border-box;
-    padding: 28px;
+    padding: 40px;
     display: flex;
     flex-direction: column;
     background: var(--pc-bg);
@@ -47,15 +51,15 @@
 }
 
 .login-screen-top {
-    border-top: 3px solid var(--pc-red);
+    border-top: 4px solid var(--pc-red);
     justify-content: space-between;
-    gap: 28px;
-    min-height: 520px;
+    gap: 40px;
+    min-height: 640px;
 }
 
 .login-screen-bottom {
-    flex-basis: 420px;
-    border-top: 3px solid var(--pc-blue);
+    flex-basis: 520px;
+    border-top: 4px solid var(--pc-blue);
 }
 
 /* ---------- left screen ---------- */
@@ -63,72 +67,78 @@
 .login-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .login-logo img {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
 }
 
 .login-logo-text {
     font-family: var(--pc-font-pixel);
-    font-size: 40px;
-    letter-spacing: 1px;
+    font-size: 56px;
+    letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--pc-text);
 }
 
 .login-tagline {
-    margin: 10px 0 0;
-    max-width: 340px;
-    font-size: 16px;
+    margin: 14px 0 0;
+    max-width: 460px;
+    font-size: 20px;
+    line-height: 1.5;
     color: var(--pc-text-muted);
 }
 
-/* paper rows run to the screen edges, so they cancel the screen's 28px padding */
+/* paper rows run to the screen edges, so they cancel the screen's 40px padding */
 .login-features {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    margin: 0 -28px;
+    gap: 4px;
+    margin: 0 -40px;
+}
+
+.login-features .pc-label-row {
+    min-height: 56px;
 }
 
 .login-features .pc-label {
-    width: 120px;
-    padding-left: 28px;
+    width: 160px;
+    padding-left: 40px;
+    font-size: 16px;
 }
 
 .login-features .pc-value {
-    font-size: 14px;
+    font-size: 17px;
 }
 
 /* ---------- tabs ---------- */
 
 .login-tabs {
     width: 100%;
-    gap: 18px;
+    gap: 24px;
 }
 
 .login-tabs-list {
     width: fit-content;
     height: auto;
-    gap: 6px;
+    gap: 8px;
     padding: 0;
     background: transparent;
     border-radius: 0;
 }
 
 .login-tabs-list button {
-    height: 44px;
-    padding: 0 22px;
+    height: 52px;
+    padding: 0 28px;
     font-family: var(--pc-font-pixel);
-    font-size: 14px;
+    font-size: 17px;
     text-transform: uppercase;
     background: var(--pc-panel-2);
     color: var(--pc-text-muted);
     border-radius: 0;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 /* Radix puts data-state="active" on the selected tab */
@@ -137,32 +147,43 @@
     color: #ffffff;
 }
 
+
+/* hide animate-ui's sliding highlight box; our active tab colours itself instead */
+.login-tabs [data-slot="motion-highlight"] {
+    display: none;
+}
+
+/* make the tab colour change quicker (the component's default is a slow 0.5s fade) */
+.login-tabs-list button {
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
 /* ---------- forms ---------- */
 
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    margin-top: 4px;
+    gap: 18px;
+    margin-top: 6px;
 }
 
 .login-heading {
-    margin: 0 0 4px;
-    font-size: 22px;
+    margin: 0 0 6px;
+    font-size: 30px;
     font-weight: 500;
 }
 
 .login-label {
-    margin-bottom: -8px;
-    font-size: 13px;
+    margin-bottom: -10px;
+    font-size: 15px;
     color: var(--pc-text-muted);
 }
 
 .login-input {
-    height: 46px;
+    height: 56px;
     box-sizing: border-box;
-    padding: 0 14px;
-    font-size: 15px;
+    padding: 0 18px;
+    font-size: 18px;
     background: var(--pc-panel);
     color: var(--pc-text);
     border: 1px solid var(--pc-line);
@@ -184,23 +205,53 @@
 }
 
 .login-error {
-    margin: -8px 0 0;
-    font-size: 13px;
+    margin: -10px 0 0;
+    font-size: 15px;
     color: var(--pc-red-text);
 }
 
 .login-submit-btn,
 .signup-submit-btn {
-    margin-top: 6px;
+    height: 56px;
+    margin-top: 8px;
+    font-size: 18px;
     text-transform: uppercase;
 }
 
-
 .login-success {
     margin: 0;
-    padding: 10px 12px;
-    font-size: 14px;
+    padding: 14px 16px;
+    font-size: 16px;
     color: var(--pc-text);
     background: #16233a;
-    border-left: 3px solid var(--pc-blue);
+    border-left: 4px solid var(--pc-blue);
+}
+
+/* ---------- narrow screens: back to smaller padding so it fits ---------- */
+
+@media (max-width: 640px) {
+    .login-content {
+        padding: 24px 12px;
+    }
+
+    .login-screen {
+        padding: 24px;
+    }
+
+    .login-screen-top {
+        min-height: 0;
+    }
+
+    .login-features {
+        margin: 0 -24px;
+    }
+
+    .login-features .pc-label {
+        width: 120px;
+        padding-left: 24px;
+    }
+
+    .login-logo-text {
+        font-size: 40px;
+    }
 }
