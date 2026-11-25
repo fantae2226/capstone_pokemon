@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { PokemonSummary } from "@/types/pokemon";
+import { typeIcon } from "@/types/pokemon";
 import './PokemonBrowser.css';
 
 interface PokemonBrowserProps {
@@ -28,17 +29,6 @@ interface Filters {
 
 type FilterSection = 'ability' | 'moves' | 'types';
 
-//Scarlet/Violet type labels from PokeAPI, looked up by PokeAPI's type id
-const TYPE_ICON_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-ix/scarlet-violet';
-const TYPE_IDS: Record<string, number> = {
-    normal: 1, fighting: 2, flying: 3, poison: 4, ground: 5, rock: 6,
-    bug: 7, ghost: 8, steel: 9, fire: 10, water: 11, grass: 12,
-    electric: 13, psychic: 14, ice: 15, dragon: 16, dark: 17, fairy: 18
-};
-
-function typeIcon(type: string){
-    return `${TYPE_ICON_URL}/${TYPE_IDS[type]}.png`;
-}
 
 export default function PokemonBrowser( { pokemon, moveNames ,fetchMoveLearners, onPick, onCancel } : PokemonBrowserProps){
     const ALL_TYPES = [

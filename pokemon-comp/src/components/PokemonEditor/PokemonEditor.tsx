@@ -1,6 +1,6 @@
-import type { TeamPokemon, Stats, StatKey } from "@/types/pokemon";
-import { STAT_LABELS } from "@/types/pokemon";
-import { useState } from "react";
+import type { TeamPokemon, Stats, StatKey, DetailKind, DetailMaps, MoveInfo, ItemInfo } from "@/types/pokemon";
+import { STAT_LABELS, typeSmallIcon } from "@/types/pokemon";
+import { useState, useEffect, useCallback } from "react";
 import SearchPicker from "../SearchPicker/SearchPicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../animate-ui/components/radix/tabs";
 import StatHexagon from "../StatHexagon/StatHexagon";
@@ -10,6 +10,8 @@ interface PokemonEditorProps {
     pokemon: TeamPokemon;
     onChange: (changes: Partial<TeamPokemon>) => void;
     itemOptions: string[];
+    details: DetailMaps; //move / item / ability details loaded so far
+    loadDetails: (kind: DetailKind, names: string[]) => void; //asks TeamViewer to load any missing details
 }
 
 
@@ -184,9 +186,67 @@ function EvRow({ label, value, canAdd, onSet }: EvRowProps){
 }
 
 
-export default function PokemonEditor( { pokemon, onChange, itemOptions }: PokemonEditorProps){
+//rich move card: dark side with the type label, paper with name, category, numbers and description
+function MoveCard({ info }: { info: MoveInfo }){
+    return (
+        <>
+            <span className="card_side">
+                <img className="card_type" src={typeSmallIcon(info.type)} alt={info.type} />
+            </span>
+            <span className="card_main">
+                <span className="card_top">
+                    <span className="card_name">{info.name.replace(/-/g, ' ')}</span>
+                    <span className="move_cat">{info.category}</span>
+                    <span className="card_numbers">
+                        Pow {info.power ?? '—'} · Acc {info.accuracy ?? '—'} · PP {info.pp ?? '—'}
+                    </span>
+                </span>
+                <span className="card_desc">{info.description}</span>
+            </span>
+        </>
+    );
+}
+
+//rich item card: dark side with the item's pixel icon, paper with name and description
+function ItemCard({ info }: { info: ItemInfo }){
+    return (
+        <>
+            <span className="card_side">
+                {info.spriteUrl && <img className="card_item_icon" src={info.spriteUrl} alt="" />}
+            </span>
+            <span className="card_main">
+                <span className="card_top">
+                    <span className="card_name">{info.name.replace(/-/g, ' ')}</span>
+                </span>
+                <span className="card_desc">{info.description}</span>
+            </span>
+        </>
+    );
+}
+
+export default function PokemonEditor( { pokemon, onChange, itemOptions, details, loadDetails }: PokemonEditorProps){
     const [editingMove, setEditingMove] = useState<number | null>(null); //which move slot is being searched
     const [editingItem, setEditingItem] = useState(false);
+
+    //load details for the 4 chosen moves, the held item and the possible abilities.
+    //each effect is keyed on a joined string so it only runs when the names change
+    const movesKey = pokemon.moves.filter(Boolean).join(',');
+    useEffect(() => {
+        if(movesKey) loadDetails('move', movesKey.split(','));
+    }, [movesKey, loadDetails]);
+
+    useEffect(() => {
+        if(pokemon.item) loadDetails('item', [pokemon.item]);
+    }, [pokemon.item, loadDetails]);
+
+    const abilitiesKey = pokemon.availableAbilities.map(a => a.name).join(',');
+    useEffect(() => {
+        if(abilitiesKey) loadDetails('ability', abilitiesKey.split(','));
+    }, [abilitiesKey, loadDetails]);
+
+    //search results: load details for whatever the pickers are showing
+    const loadMoveMatches = useCallback((names: string[]) => loadDetails('move', names), [loadDetails]);
+    const loadItemMatches = useCallback((names: string[]) => loadDetails('item', names), [loadDetails]);
 
     //copy the moves, swap in the new one, and tell TeamViewer
     function pickMove(i: number, name: string){
@@ -272,8 +332,14 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                                 className={`move_slot pc-label-row pc-paper ${editingMove === i ? 'slot_active' : ''}`}
                                 onClick={() => { setEditingMove(i); setEditingItem(false); }}
                             >
-                                <span className="pc-label">Move {i + 1}</span>
-                                <span className="pc-value">{move ? move.replace(/-/g, ' ') : 'Choose a move'}</span>
+                                {move && details.move[move] ? (
+                                    <MoveCard info={details.move[move]} />
+                                ) : (
+                                    <>
+                                        <span className="pc-label">Move {i + 1}</span>
+                                        <span className="pc-value">{move ? move.replace(/-/g, ' ') : 'Choose a move'}</span>
+                                    </>
+                                )}
                             </button>
                         ))}
 
@@ -283,6 +349,10 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                                 placeholder={`Search moves for ${pokemon.name}...`}
                                 onPick={name => pickMove(editingMove, name)}
                                 onCancel={() => setEditingMove(null)}
+                                onMatches={loadMoveMatches}
+                                renderOption={name => details.move[name]
+                                    ? <span className="picker_card"><MoveCard info={details.move[name]} /></span>
+                                    : name.replace(/-/g, ' ')}
                             />
                         )}
 
@@ -291,8 +361,14 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             className={`item_slot pc-label-row pc-paper ${editingItem ? 'slot_active' : ''}`}
                             onClick={() => {setEditingItem(true); setEditingMove(null);}}
                         >
-                            <span className="pc-label">Held item</span>
-                            <span className="pc-value">{pokemon.item ? pokemon.item.replace(/-/g, ' ') : 'Choose an item'}</span>
+                            {pokemon.item && details.item[pokemon.item] ? (
+                                <ItemCard info={details.item[pokemon.item]} />
+                            ) : (
+                                <>
+                                    <span className="pc-label">Held item</span>
+                                    <span className="pc-value">{pokemon.item ? pokemon.item.replace(/-/g, ' ') : 'Choose an item'}</span>
+                                </>
+                            )}
                         </button>
 
                         {editingItem && (
@@ -301,6 +377,10 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                                 placeholder="Search Items..."
                                 onPick={pickItem}
                                 onCancel={() => setEditingItem(false)}
+                                onMatches={loadItemMatches}
+                                renderOption={name => details.item[name]
+                                    ? <span className="picker_card"><ItemCard info={details.item[name]} /></span>
+                                    : name.replace(/-/g, ' ')}
                             />
                         )}
 
@@ -389,19 +469,24 @@ export default function PokemonEditor( { pokemon, onChange, itemOptions }: Pokem
                             />
                         </label>
 
-                        <label className="detail_row pc-label-row pc-paper">
-                            <span className="pc-label">Ability</span>
-                            <select 
-                                value={pokemon.ability ?? ''}
-                                onChange={e => onChange({ ability: e.target.value })}
-                            >
-                                {pokemon.availableAbilities.map((a, i) => (
-                                    <option key={i} value={a.name}>
-                                        {a.name.replace(/-/g, ' ')}{a.hidden ? ' (Hidden)' : ''}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
+                        <div className="ability_options" role="radiogroup" aria-label="Ability">
+                            {pokemon.availableAbilities.map(a => (
+                                <button
+                                    key={a.name}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={pokemon.ability === a.name}
+                                    className={`ability_option pc-label-row pc-paper ${pokemon.ability === a.name ? 'ability_selected' : ''}`}
+                                    onClick={() => onChange({ ability: a.name })}
+                                >
+                                    <span className="pc-label">{a.hidden ? 'Hidden' : 'Ability'}</span>
+                                    <span className="card_main">
+                                        <span className="card_name">{a.name.replace(/-/g, ' ')}</span>
+                                        <span className="card_desc">{details.ability[a.name]?.description ?? 'Loading...'}</span>
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </TabsContent>
             </Tabs>

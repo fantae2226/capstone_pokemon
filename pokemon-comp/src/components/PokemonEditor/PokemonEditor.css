@@ -386,6 +386,137 @@
     font-size: 17px;
 }
 
+/* ---------- rich cards: moves, held item, abilities ---------- */
+
+/* filled move / item slots are taller to fit the description */
+.move_slot,
+.item_slot {
+    min-height: 78px;
+}
+
+/* dark block on the left (type label or item icon) slanting into the paper */
+.card_side {
+    flex: none;
+    width: 96px;
+    box-sizing: border-box;
+    padding-right: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pc-panel-2);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+/* simplified Gen 9 type icon, cropped from a rounded square to a circle */
+.card_type {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;     /* replaces height: 26px; width: auto; */
+}
+
+/* item icons are 30x30 pixel art: show at exactly 2x, kept sharp */
+.card_item_icon {
+    width: 60px;
+    height: 60px;
+    image-rendering: pixelated;
+}
+
+.card_main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 16px;
+    color: var(--pc-paper-text);
+}
+
+.card_top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+}
+
+.card_name {
+    font-size: 19px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.move_cat {
+    padding: 2px 8px;
+    font-family: var(--pc-font-pixel);
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--pc-text);
+    background: var(--pc-panel-2);
+}
+
+.card_numbers {
+    margin-left: auto;
+    font-family: var(--pc-font-mono);
+    font-size: 14px;
+    white-space: nowrap;
+    color: var(--pc-paper-muted);
+}
+
+.card_desc {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--pc-paper-muted);
+}
+
+/* the same cards inside the move / item search results */
+.search_picker .picker_card {
+    display: flex;
+    align-items: stretch;
+    min-height: 72px;
+    margin-left: -16px;   /* cancels the result button's left padding so the dark block sits flush */
+}
+
+.search_picker .picker_card .card_side {
+    width: 84px;
+}
+
+/* ability choices (Details tab) */
+.ability_options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ability_option {
+    width: 100%;
+    min-height: 72px;
+    padding: 0;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    transition: background-color 0.15s ease;
+}
+
+.ability_option:hover {
+    background-color: #d3cbb8;
+}
+
+.ability_option .pc-label {
+    width: 130px;
+    font-size: 15px;
+}
+
+.ability_selected {
+    outline: 3px solid var(--pc-blue);
+    outline-offset: -3px;
+}
+
+.ability_selected .pc-label {
+    color: #ffffff;
+    background: var(--pc-blue);
+}
+
 /* ---------- narrow screens ---------- */
 
 @media (max-width: 640px) {
@@ -414,5 +545,13 @@
     .ev_row {
         grid-template-columns: 48px 40px 1fr 40px 64px;
         gap: 6px;
+    }
+
+    .card_side {
+        width: 100px;
+    }
+
+    .card_numbers {
+        margin-left: 0;
     }
 }

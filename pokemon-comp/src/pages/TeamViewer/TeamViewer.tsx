@@ -1,5 +1,5 @@
 import { HexagonBackground } from "@/components/animate-ui/components/backgrounds/hexagon"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom";
 import pokeball from '../../assets/Pokeball.png';
 import type { TeamPokemon } from "@/types/pokemon";
@@ -7,7 +7,7 @@ import PokemonEditor from "@/components/PokemonEditor/PokemonEditor";
 // import SearchPicker from "@/components/SearchPicker/SearchPicker";
 import Modal from "@/components/Modal/Modal";
 import PokemonBrowser from "@/components/PokemonBrowser/PokemonBrowser";
-import type { PokemonSummary } from "@/types/pokemon";
+import type { PokemonSummary, DetailKind, DetailMaps, MoveInfo, ItemInfo, AbilityInfo } from "@/types/pokemon";
 import './TeamViewer.css';
 import Navbar from "../Dashboard/Navbar";
 import supabase from "@/lib/supabase";
@@ -180,6 +180,66 @@ async function fetchMoveLearners(moves: string[]): Promise<Set<string>> {
     return new Set(json.data.pokemon.map((p: any) => String(p.id)));
 }
 
+//------------------------------------------------------------------
+//move / item / ability details for the editor's cards
+//------------------------------------------------------------------
+
+const POKEAPI_URL = 'https://pokeapi.co/api/v2';
+
+//one request per name, ever: the promise is kept so repeat lookups reuse it
+const detailCache = new Map<string, Promise<any>>();
+
+function fetchDetailJson(kind: DetailKind, name: string): Promise<any> {
+    const key = `${kind}/${name}`;
+    if(!detailCache.has(key)){
+        detailCache.set(key, fetch(`${POKEAPI_URL}/${key}`)
+            .then(res => {
+                if(!res.ok) throw new Error(`PokeAPI request failed: ${res.status}`);
+                return res.json();
+            })
+            .catch(error => { detailCache.delete(key); throw error; }));
+    }
+    return detailCache.get(key)!;
+}
+
+//short English effect text, falling back to the newest English flavor text (newer moves/abilities have no effect text yet)
+function englishText(raw: any): string {
+    const effect = raw.effect_entries?.find((e: any) => e.language.name === 'en');
+    if(effect) return effect.short_effect.replace('$effect_chance', String(raw.effect_chance ?? ''));
+
+    const flavor = [...(raw.flavor_text_entries ?? [])].reverse().find((f: any) => f.language.name === 'en');
+    return flavor ? (flavor.flavor_text ?? flavor.text ?? '').replace(/\s+/g, ' ') : '';
+}
+
+function toMoveInfo(raw: any): MoveInfo {
+    return {
+        name: raw.name,
+        type: raw.type.name,
+        category: raw.damage_class?.name ?? 'status',
+        power: raw.power,
+        accuracy: raw.accuracy,
+        pp: raw.pp,
+        description: englishText(raw)
+    };
+}
+
+function toItemInfo(raw: any): ItemInfo {
+    return {
+        name: raw.name,
+        spriteUrl: raw.sprites?.default ?? null,
+        description: englishText(raw)
+    };
+}
+
+function toAbilityInfo(raw: any): AbilityInfo {
+    return {
+        name: raw.name,
+        description: englishText(raw)
+    };
+}
+
+const TO_INFO = { move: toMoveInfo, item: toItemInfo, ability: toAbilityInfo };
+
 export default function TeamViewer(){
     const { teamId } = useParams<{ teamId: string}>();
 
@@ -195,6 +255,26 @@ export default function TeamViewer(){
     //new modal stuff
     const [allPokemon, setAllPokemon] = useState<PokemonSummary[]>([]);
     const [allMoveNames, setAllMoveNames] = useState<string[]>([]);
+
+    //details shown on the editor's move / item / ability cards
+    const [details, setDetails] = useState<DetailMaps>({ move: {}, item: {}, ability: {} });
+
+    //fetches any of these names we don't have yet and adds them to details
+    const loadDetails = useCallback(async (kind: DetailKind, names: string[]) => {
+        const results = await Promise.allSettled(names.map(name => fetchDetailJson(kind, name)));
+
+        setDetails(prev => {
+            const added: Record<string, any> = {};
+            results.forEach((result, i) => {
+                if(result.status === 'fulfilled' && !prev[kind][names[i]]){
+                    added[names[i]] = TO_INFO[kind](result.value);
+                }
+            });
+            //nothing new: return the same object so React skips the re-render
+            if(Object.keys(added).length === 0) return prev;
+            return { ...prev, [kind]: { ...prev[kind], ...added } };
+        });
+    }, []);
 
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState('');
@@ -448,6 +528,8 @@ export default function TeamViewer(){
                                 pokemon={draft}
                                 onChange={changes => setDraft(prev => (prev ? withSprite({...prev, ...changes}) : prev))}
                                 itemOptions={allItemNames}
+                                details={details}
+                                loadDetails={loadDetails}
                             />
                             <div className="editor_actions">
                                 <button className="pc-btn" onClick={closeEditor}>Cancel</button>
