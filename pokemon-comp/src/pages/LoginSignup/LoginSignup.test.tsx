@@ -261,5 +261,61 @@ describe("LoginSignup", () => {
             expect(password).toHaveValue(VALID_SIGNUP.password);
             expect(confirmPassword).toHaveValue(VALID_SIGNUP.confirmPassword);
         });
+
+        test("switches to Login with a success message and the email filled in", async () => {
+            (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+                ok: true,
+                json: async () => ({ message: "Signup successful" }),
+            });
+            render(<LoginSignup />);
+            await switchToSignup();
+            const { username, email, password, confirmPassword, submitBtn } = getSignupFields();
+            await userEvent.type(username, VALID_SIGNUP.username);
+            await userEvent.type(email, VALID_SIGNUP.email);
+            await userEvent.type(password, VALID_SIGNUP.password);
+            await userEvent.type(confirmPassword, VALID_SIGNUP.confirmPassword);
+            await userEvent.click(submitBtn);
+
+            expect(await screen.findByText("Account created. Log in to continue.")).toBeInTheDocument();
+            expect(screen.getByRole("tab", { name: /login/i })).toHaveAttribute("data-state", "active");
+            expect(getLoginFields().email).toHaveValue(VALID_SIGNUP.email);
+        });
+    });
+
+    describe("Signup – failed submission", () => {
+        test("shows the backend's error under the email field and stays on Sign Up", async () => {
+            (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+                ok: false,
+                json: async () => ({ message: "Signup failed", error: "User already registered" }),
+            });
+            render(<LoginSignup />);
+            await switchToSignup();
+            const { username, email, password, confirmPassword, submitBtn } = getSignupFields();
+            await userEvent.type(username, VALID_SIGNUP.username);
+            await userEvent.type(email, VALID_SIGNUP.email);
+            await userEvent.type(password, VALID_SIGNUP.password);
+            await userEvent.type(confirmPassword, VALID_SIGNUP.confirmPassword);
+            await userEvent.click(submitBtn);
+
+            expect(await screen.findByText("User already registered")).toBeInTheDocument();
+            expect(screen.getByRole("tab", { name: /sign up/i })).toHaveAttribute("data-state", "active");
+        });
+
+        test("falls back to a general message when the backend sends no error text", async () => {
+            (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+                ok: false,
+                json: async () => ({}),
+            });
+            render(<LoginSignup />);
+            await switchToSignup();
+            const { username, email, password, confirmPassword, submitBtn } = getSignupFields();
+            await userEvent.type(username, VALID_SIGNUP.username);
+            await userEvent.type(email, VALID_SIGNUP.email);
+            await userEvent.type(password, VALID_SIGNUP.password);
+            await userEvent.type(confirmPassword, VALID_SIGNUP.confirmPassword);
+            await userEvent.click(submitBtn);
+
+            expect(await screen.findByText("Signup failed. Try again.")).toBeInTheDocument();
+        });
     });
 });
